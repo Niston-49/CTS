@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0a08;--fg:#e8dcc5;--mut:#a69878;--pn:#161410;--ac:#2f86c7;--ok:#7a9b6e;--bad:#b85c4e;--ln:#332e24;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:500 17px/1.45 'Barlow Semi Condensed',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:.5px}h2{font-size:22px;margin:0 0 8px}
+p{margin:0 0 12px}.mut{color:var(--mut)}
+section{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:16px;margin:14px 0}
+section.off{display:none}
+label{display:block;font-weight:700;margin:12px 0 4px}
+select,input[type=file]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}
+button{font:700 18px inherit;font-family:inherit;padding:14px 18px;border-radius:8px;border:0;background:var(--ac);color:#f3ead9;width:100%;margin-top:12px}
+button.sec{background:transparent;color:var(--fg);border:2px solid var(--ln)}
+button:focus-visible,select:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:8px}
+.li{padding:10px 0;border-top:1px solid var(--ln)}.li:first-child{border:0}
+.tag{display:inline-block;min-width:74px;font-weight:700}
+.bad{color:var(--bad)}.ok{color:var(--ok)}
+.seg{display:flex;gap:8px;margin:12px 0}.seg button{margin:0;background:transparent;border:2px solid var(--ln);color:var(--fg)}.seg button.on{background:var(--ac);border-color:var(--ac);color:#f3ead9}body:not(.expert) .exp{display:none}details{margin-top:8px}summary{font-weight:700;padding:8px 0}input[type=number],input[type=text]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--ln)}
+</style></head><body>
+<h1>CTS</h1>
+<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p>
+<p class="mut">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p>
+<div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button></div>
+
+<section id="s1"><h2>1. Ton installation</h2>
+<label for="salle">Lieu</label>
+<select id="salle"><option value="1">Petite salle (bar, salle de classe)</option><option value="2" selected>Salle moyenne (salle des fêtes)</option><option value="3">Grande salle ou très réverbérante</option><option value="4">En plein air</option></select>
+<label for="proc">Avec quoi tu règles le son ?</label>
+<p class="mut" style="margin:0 0 6px">C'est l'appareil où tu règles le son avant les enceintes. Pas sûr ? Laisse « Je ne sais pas ».</p>
+<select id="proc"><option value="3">Je ne sais pas</option><option value="3">Une petite table de mixage (boutons graves / médiums / aigus)</option><option value="4">Une table de mixage numérique (X32, XR18, Yamaha, Allen &amp; Heath…)</option><option value="9">Un processeur d'enceintes (DriveRack, miniDSP, Lake…)</option><option value="8">Un logiciel ou un appareil avec égaliseur paramétrique libre</option></select>
+<label for="brand">Marque et modèle (facultatif)</label>
+<input type="text" id="brand" placeholder="Marque, ex. Behringer" autocomplete="off"><input type="text" id="model" placeholder="Modèle, ex. XR18" autocomplete="off" style="margin-top:8px">
+<p id="pf" class="mut" style="margin:6px 0 0"></p>
+<label for="mic">Micro de mesure</label>
+<select id="mic"><option value="tel">Micro du téléphone (indicatif)</option><option value="ext">Micro externe (avec fichier de calibration)</option></select>
+<div id="calbox" style="display:none"><label for="calf">Fichier de calibration (.txt : fréquence gain)</label><input type="file" id="calf" accept=".txt,.cal,.csv"></div>
+<div class="exp"><label for="dur">Durée de moyenne (s)</label><input type="number" id="dur" value="8" min="3" max="60">
+<label for="slope">Pente cible au-dessus de 4 kHz (dB/octave)</label><input type="number" id="slope" value="-1.5" step="0.5">
+<label for="thr">Seuil de correction (dB)</label><input type="number" id="thr" value="3" step="0.5">
+<label for="mcut">Coupe maximale (dB)</label><input type="number" id="mcut" value="6" step="0.5">
+<label for="qv">Q des filtres (vide = automatique)</label><input type="number" id="qv" step="0.5" min="0.5">
+<label for="nf">Nombre de filtres disponibles (vide = selon l'appareil)</label><input type="number" id="nf" min="1" max="31"></div>
+<button id="go1">Continuer</button></section>
+
+<section id="s2" class="off"><h2>2. Mesure</h2>
+<p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
+<canvas id="cv" width="560" height="220"></canvas>
+<button id="bmic">Activer le micro</button>
+<button id="bnoise" class="sec" disabled>Lancer le bruit rose</button>
+<button id="bmes" disabled>Analyser</button>
+<p id="st" class="mut"></p></section>
+
+<section id="s3" class="off"><h2>3. Résultat</h2>
+<div id="adv"></div>
+<details id="dt"><summary>Réglages précis (filtres)</summary>
+<div class="tbl"><table id="peq"></table></div></details>
+<div class="exp"><h2 style="margin-top:16px">Écart par bande</h2><div class="tbl"><table id="bands"></table></div><button id="cp" class="sec">Copier les filtres</button></div>
+<button id="again" class="sec">Refaire une mesure</button></section>
+
+<script>
+const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
+let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null;
+const $=id=>document.getElementById(id),show=id=>{['s1','s2','s3'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+$('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
+$('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
+function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
+$('go1').onclick=()=>show('s2');
+const V=(id,d)=>{const x=parseFloat($(id).value);return document.body.classList.contains('expert')&&!isNaN(x)?x:d};
+function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
+function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
+return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
+function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
+function draw(v,fin){const c=$('cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+const bw=W/B.length,mid=H/2,k=H/28;g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+v.forEach((x,i)=>{x=Math.max(-14,Math.min(14,x));g.fillStyle=Math.abs(x)<3?'#2e9e5b':Math.abs(x)<6?'#f2a900':'#d64545';g.fillRect(i*bw+2,x>0?mid-x*k:mid,bw-4,Math.abs(x)*k)});
+g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
+function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
+$('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;ctx.createMediaStreamSource(stream).connect(an);
+$('bmic').style.display='none';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop()}
+catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
+$('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose';return}
+const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926}
+noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;noise.connect(ctx.destination);noise.start();$('bnoise').textContent='Arrêter le bruit rose'};
+$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));$('bmes').disabled=true;$('bmes').textContent='Mesure… '+t+' s';const iv=setInterval(()=>{t--;$('bmes').textContent='Mesure… '+t+' s';if(t<0){clearInterval(iv);mesuring=false;$('bmes').textContent='Analyser';$('bmes').disabled=false;
+dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose'}result(dev)}},1000)};
+const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
+function advice(d){const a=[],s=$('salle').value,g=avg(d,0,4),h=avg(d,19,26),m=avg(d,5,9);
+const add=(c,t)=>a.push(`<div class="li"><span class="tag ${c}">${c==='ok'?'OK':'À régler'}</span>${t}</div>`);
+if(g>4)add('bad',`Trop de grave (${g.toFixed(0)} dB en trop sous 100 Hz). Baisse le niveau des subs d'environ ${Math.min(6,Math.round(g))} dB, ou éloigne-les des murs et des coins.`);
+else if(g<-4)add('bad',`Il manque du grave (${Math.abs(g).toFixed(0)} dB). Monte les subs de ${Math.min(6,Math.round(-g))} dB, rapproche-les d'un mur, et vérifie la polarité sub et tops.`);
+else add('ok','Le grave est équilibré.');
+if(m>4)add('bad','Médiums en excès : le son sera nasillard ou agressif. Vérifie les filtres passe-haut sur les subs et les positions des enceintes.');
+if(h>4)add('bad','Aigus trop présents : baisse un peu le niveau des aigus. Ils fatigueront vite.');
+else if(h<-5)add('bad','Aigus étouffés : oriente les enceintes vers le public, sur pied à hauteur d\'oreilles.');
+else add('ok','Les aigus sont corrects.');
+d.forEach((x,i)=>{if(x>7)add('bad',`Pic marqué à ${B[i]} Hz : risque de larsen ou de résonance de salle. Un filtre est conseillé.`)});
+if(s==='3')a.push('<div class="li mut">Salle très réverbérante : mesure plusieurs points dans le public et vise la moyenne.</div>');
+if(s==='4')a.push('<div class="li mut">En plein air, il n\'y a pas de murs pour renforcer le grave : un léger manque est normal, et regrouper les subs aide. Le vent fausse la mesure : protège le micro avec une bonnette en mousse et mesure par temps calme.</div>');
+$('adv').innerHTML=a.join('')}
+const DB=[
+{re:/xr[\s-]?1[26]/,name:'Behringer X Air XR16 / XR12',n:6,geq:1,ok:0,where:"Dans X Air Edit, ouvre le bus Main LR puis l'onglet EQ."},
+{re:/x[\s-]?air|xr[\s-]?18|x18|mr[\s-]?18/,name:'Behringer X Air XR18 / X18 / MR18',n:6,geq:1,ok:1,where:"Dans X Air Edit, ouvre le bus Main LR puis l'onglet EQ (6 bandes paramétriques ou graphique 31 bandes)."},
+{re:/x[\s-]?32/,name:'Behringer X32',n:6,geq:1,ok:0,where:"Sur le bus Main LR, page EQ."},
+{re:/pa[\s-]?2/,name:'dbx DriveRack PA2',n:8,geq:1,ok:1,where:"Règle l'égaliseur d'entrée (paramétrique 8 bandes ou graphique 31 bandes, pas de 1 dB) et laisse les EQ de sortie aux réglages des enceintes. Le PA2 a aussi sa propre Auto-EQ avec micro de mesure : compare les deux."}];
+const getProf=()=>{const s=($('brand').value+' '+$('model').value).toLowerCase();return DB.find(p=>p.re.test(s))||null};
+const upd=()=>{const p=getProf(),t=($('brand').value+$('model').value).trim();$('pf').textContent=p?'Appareil reconnu : '+p.name+(p.ok?'':' (profil à confirmer dans le manuel)'):t?'Appareil non reconnu : réglages génériques, adaptés au type choisi ci-dessus.':''};
+$('brand').oninput=$('model').oninput=upd;
+function result(d){show('s3');advice(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];const thr=V('thr',3),mc=V('mcut',6),qq=V('qv',0);
+$('bands').innerHTML='<tr><th>Fréq.</th><th>Écart</th></tr>'+d.map((x,i)=>`<tr><td>${B[i]} Hz</td><td>${x>0?'+':''}${x.toFixed(1)} dB</td></tr>`).join('');
+const pr=getProf(),kind=pr?'peq':(+$('proc').value===3?'knob':'peq'),nn=Math.round(V('nf',pr?pr.n:+$('proc').value));
+d.forEach((x,i)=>{if(x>thr)c.push({f:B[i],g:-Math.min(mc,x-1),q:qq||(i<7?4:5),x})});
+c.sort((p,q)=>q.x-p.x);const sel=c.slice(0,nn).sort((p,q)=>p.f-q.f);
+const row=a=>'<tr>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>',ti=t=>`<tr><th colspan="4">${t}</th></tr>`,nt=t=>`<tr><td colspan="4" class="mut">${t}</td></tr>`;
+let h=pr?nt(pr.name+(pr.ok?'':' (profil à confirmer dans le manuel)')+'. '+pr.where):'';
+if(kind==='knob'){h+=ti('Boutons à régler')+[['Graves',0,5],['Médiums',10,17],['Aigus',19,26]].map(([n,i,j])=>{const v=Math.max(-6,Math.min(6,-avg(d,i,j)));return row([n,Math.abs(v)<2?'Ne touche pas':(v>0?'+':'')+Math.round(v)+' dB'])}).join('')}
+else{h+=ti('Filtres paramétriques (type cloche)')+'<tr><th>N°</th><th>Fréq.</th><th>Gain</th><th>Q</th></tr>'+(sel.length?sel.map((f,i)=>row([i+1,f.f+' Hz',(Math.round(f.g*2)/2).toFixed(1)+' dB',f.q])).join(''):nt('Aucun filtre nécessaire.'));
+if(pr&&pr.geq&&c.length)h+=ti('Ou égaliseur graphique 31 bandes')+[...c].sort((p,q)=>p.f-q.f).map(f=>row([f.f+' Hz',Math.round(f.g)+' dB'])).join('')}
+h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h}
+$('again').onclick=()=>show('s2');
+const setM=e=>{document.body.classList.toggle('expert',e);$('mE').classList.toggle('on',e);$('mB').classList.toggle('on',!e);$('mE').setAttribute('aria-pressed',e);$('mB').setAttribute('aria-pressed',!e)};
+$('mB').onclick=()=>setM(false);$('mE').onclick=()=>setM(true);
+$('cp').onclick=async()=>{try{await navigator.clipboard.writeText([...$('peq').querySelectorAll('tr')].map(r=>[...r.cells].map(c=>c.textContent).join('\t')).join('\n'));$('cp').textContent='Copié'}catch(e){$('cp').textContent='Copie impossible'}};
+</script></body></html>
