@@ -75,9 +75,18 @@ function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
-function draw(v,fin){const c=$('cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
-const bw=W/B.length,mid=H/2,k=H/28;g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
-v.forEach((x,i)=>{x=Math.max(-14,Math.min(14,x));g.fillStyle=Math.abs(x)<3?'#2e9e5b':Math.abs(x)<6?'#f2a900':'#d64545';g.fillRect(i*bw+2,x>0?mid-x*k:mid,bw-4,Math.abs(x)*k)});
+function draw(v){const c=$('cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+const bw=W/B.length,mid=H/2,k=H/28;
+const zone=(lo,hi,col)=>{g.fillStyle=col;g.fillRect(0,mid-hi*k,W,(hi-lo)*k);g.fillRect(0,mid+lo*k,W,(hi-lo)*k)};
+zone(0,3,'rgba(122,155,110,.16)');zone(3,6,'rgba(242,169,0,.13)');zone(6,14,'rgba(184,92,78,.13)');
+g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
+const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(47,134,199,.35)');grad.addColorStop(.5,'rgba(47,134,199,.05)');grad.addColorStop(1,'rgba(47,134,199,.35)');
+g.beginPath();g.moveTo(pts[0][0],mid);g.lineTo(pts[0][0],pts[0][1]);
+for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
+g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);const last=pts[pts.length-1];g.lineTo(last[0],mid);g.closePath();g.fillStyle=grad;g.fill();
+g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(last[0],last[1]);
+g.lineWidth=2.5;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke();
 g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
 $('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
@@ -86,8 +95,9 @@ $('bmic').style.display='none';$('bnoise').disabled=false;$('bmes').disabled=fal
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
 $('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose';return}
 const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926}
-noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;noise.connect(ctx.destination);noise.start();$('bnoise').textContent='Arrêter le bruit rose'};
+for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
+const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[len-xf+i]*(1-k)+s*k}
+noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').textContent='Arrêter le bruit rose'};
 $('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));$('bmes').disabled=true;$('bmes').textContent='Mesure… '+t+' s';const iv=setInterval(()=>{t--;$('bmes').textContent='Mesure… '+t+' s';if(t<0){clearInterval(iv);mesuring=false;$('bmes').textContent='Analyser';$('bmes').disabled=false;
 dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose'}result(dev)}},1000)};
 const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
