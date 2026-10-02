@@ -44,27 +44,10 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 
 <section id="sWelcome"><h2>Bienvenue</h2>
 <p>CTS t'aide à régler ta sono sans ingénieur du son, avec trois façons de t'en servir :</p>
-<div class="pl"><h3>Basique</h3><p>Mesure guidée et conseils en français simple. <span class="prix">Gratuit</span></p></div>
-<div class="pl"><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur. <span class="prix">Tarif à confirmer — brouillon : 2 à 4 €/mois ou licence association 25 à 40 €/an</span></p></div>
-<div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec alertes douces en cas de dérive. <span class="prix">Inclus avec Expert (à confirmer)</span></p></div>
-<p class="mut" style="font-size:14px">Les tarifs ci-dessus sont encore à l'étude, ils peuvent changer.</p>
+<div class="pl"><h3>Basique</h3><p>Mesure guidée et conseils en français simple, pour s'y retrouver rapidement.</p></div>
+<div class="pl"><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur.</p></div>
+<div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec des alertes douces en cas de dérive du son.</p></div>
 <button id="wOk">Continuer</button></section>
-
-<section id="sReg" class="off"><h2>Créer un compte</h2>
-<p class="mut">Nom, prénom et e-mail sont obligatoires pour utiliser l'appli. La structure (asso, société) est facultative.</p>
-<label for="rNom">Nom</label><input type="text" id="rNom" autocomplete="family-name">
-<label for="rPrenom">Prénom</label><input type="text" id="rPrenom" autocomplete="given-name">
-<label for="rEmail">E-mail</label><input type="email" id="rEmail" autocomplete="email" inputmode="email">
-<label for="rOrg">Association ou société (facultatif)</label><input type="text" id="rOrg" autocomplete="organization">
-<p id="rErr" class="err" style="display:none"></p>
-<button id="rGo">Recevoir le code par e-mail</button></section>
-
-<section id="sVerify" class="off"><h2>Vérifie ton e-mail</h2>
-<p class="mut">Un code à 6 chiffres vient d'être envoyé à <strong id="vEmail"></strong>.</p>
-<input type="text" id="vCode" class="codeInput" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="------">
-<p id="vErr" class="err" style="display:none"></p>
-<button id="vGo">Valider</button>
-<button id="vResend" class="sec">Renvoyer le code</button></section>
 
 <section id="s1" class="off"><h2>1. Ton installation</h2>
 <label for="salle">Lieu</label>
@@ -117,7 +100,7 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','sReg','sVerify','s1','s2','s3','s4'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 $('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
 function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
@@ -263,41 +246,11 @@ m.innerHTML=`<div class="box"><h2 style="margin-top:0">Avant de lancer le Live</
 document.body.appendChild(m);
 $('liveInfoOk').onclick=()=>{if($('liveInfoSkip').checked)localStorage.setItem('cts_liveinfo','1');m.remove();res()}})}
 
-// --- Inscription / vérification ---
-let regData=null;
-function emailOk(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)}
-function backendReady(){return !AI_WORKER_URL.includes('VOTRE-WORKER')}
-function showErr(id,msg){const e=$(id);e.textContent=msg;e.style.display=msg?'block':'none'}
-$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('sReg')};
-$('rGo').onclick=async()=>{showErr('rErr','');
-const nom=$('rNom').value.trim(),prenom=$('rPrenom').value.trim(),email=$('rEmail').value.trim(),org=$('rOrg').value.trim();
-if(!nom||!prenom){showErr('rErr','Nom et prénom sont obligatoires.');return}
-if(!emailOk(email)){showErr('rErr','Adresse e-mail invalide.');return}
-if(!backendReady()){showErr('rErr',"L'inscription n'est pas encore activée, reviens un peu plus tard.");return}
-$('rGo').disabled=true;$('rGo').textContent='Envoi…';
-try{
-const res=await fetch(AI_WORKER_URL.replace(/\/$/,'')+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nom,prenom,email,organisation:org})});
-const j=await res.json();
-if(!res.ok||j.error){showErr('rErr',j.error==='disposable'?'Les adresses e-mail jetables ne sont pas acceptées.':j.error==='exists'?'Ce compte existe déjà, vérifie ta boîte mail ou connecte-toi.':'Inscription impossible, réessaie.');$('rGo').disabled=false;$('rGo').textContent='Recevoir le code par e-mail';return}
-regData={nom,prenom,email,organisation:org};$('vEmail').textContent=email;$('vCode').value='';showErr('vErr','');show('sVerify')
-}catch(e){showErr('rErr','Connexion impossible, réessaie.')}
-$('rGo').disabled=false;$('rGo').textContent='Recevoir le code par e-mail'};
-$('vGo').onclick=async()=>{if(!regData)return;showErr('vErr','');const code=$('vCode').value.trim();
-if(!/^[0-9]{6}$/.test(code)){showErr('vErr','Entre les 6 chiffres reçus par e-mail.');return}
-$('vGo').disabled=true;
-try{
-const res=await fetch(AI_WORKER_URL.replace(/\/$/,'')+'/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:regData.email,code})});
-const j=await res.json();
-if(!res.ok||j.error){showErr('vErr',j.error==='expired'?'Ce code a expiré, demande-en un nouveau.':'Code incorrect.');$('vGo').disabled=false;return}
-localStorage.setItem('cts_session',JSON.stringify(regData));show('s1')
-}catch(e){showErr('vErr','Connexion impossible, réessaie.')}
-$('vGo').disabled=false};
-$('vResend').onclick=()=>{if(!regData)return;fetch(AI_WORKER_URL.replace(/\/$/,'')+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(regData)}).catch(()=>{});$('vResend').textContent='Code renvoyé';setTimeout(()=>$('vResend').textContent='Renvoyer le code',4000)};
+// --- Accueil (première ouverture) ---
+$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('s1')};
 
 // --- Démarrage ---
 (function boot(){
-const sess=localStorage.getItem('cts_session');
-if(sess){try{regData=JSON.parse(sess);show('s1');return}catch(e){}}
-if(localStorage.getItem('cts_seenintro')){show('sReg')}else{show('sWelcome')}
+if(localStorage.getItem('cts_seenintro')){show('s1')}else{show('sWelcome')}
 })();
 </script></body></html>
