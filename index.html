@@ -18,16 +18,55 @@ button.sec{background:transparent;color:var(--fg);border:2px solid var(--ln)}
 button:focus-visible,select:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:8px}
 .li{padding:10px 0;border-top:1px solid var(--ln)}.li:first-child{border:0}
+#ai{border-left:3px solid var(--ac);padding:4px 12px;margin-bottom:14px;background:rgba(47,134,199,.08);border-radius:0 6px 6px 0}
+#ai p{margin:0}#ai .lbl{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);margin-bottom:4px;font-weight:700}
+#fb{margin-top:18px;padding-top:14px;border-top:1px solid var(--ln)}
+#fb .row{display:flex;gap:10px}#fb .row button{margin-top:0;flex:1}
+#fb textarea{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);margin-top:8px;resize:vertical;min-height:60px}
+#fb .thx{color:var(--ok);font-weight:700}
 .tag{display:inline-block;min-width:74px;font-weight:700}
+.badge{display:inline-block;padding:5px 14px;border-radius:999px;font-weight:700;margin-bottom:12px}
+.badge.ok{background:rgba(122,155,110,.18);color:var(--ok)}
+.badge.warn{background:rgba(242,169,0,.18);color:#f2a900}
+.badge.bad{background:rgba(184,92,78,.18);color:var(--bad)}
 .bad{color:var(--bad)}.ok{color:var(--ok)}
 .seg{display:flex;gap:8px;margin:12px 0}.seg button{margin:0;background:transparent;border:2px solid var(--ln);color:var(--fg)}.seg button.on{background:var(--ac);border-color:var(--ac);color:#f3ead9}body:not(.expert) .exp{display:none}details{margin-top:8px}summary{font-weight:700;padding:8px 0}input[type=number],input[type=text]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--ln)}
+.pl{border-left:3px solid var(--ln);padding:2px 14px;margin:14px 0}.pl h3{margin:0 0 4px;font-size:18px}.pl .prix{color:var(--ac);font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.modal .box{background:var(--pn);border:1px solid var(--ln);border-radius:14px 14px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%}
+.err{color:var(--bad);margin:-6px 0 10px;font-size:14px}
+.codeInput{letter-spacing:8px;font-size:24px;text-align:center}
 </style></head><body>
 <h1>CTS</h1>
 <p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p>
 <p class="mut">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p>
 <div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button></div>
 
-<section id="s1"><h2>1. Ton installation</h2>
+<section id="sWelcome"><h2>Bienvenue</h2>
+<p>CTS t'aide à régler ta sono sans ingénieur du son, avec trois façons de t'en servir :</p>
+<div class="pl"><h3>Basique</h3><p>Mesure guidée et conseils en français simple. <span class="prix">Gratuit</span></p></div>
+<div class="pl"><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur. <span class="prix">Tarif à confirmer — brouillon : 2 à 4 €/mois ou licence association 25 à 40 €/an</span></p></div>
+<div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec alertes douces en cas de dérive. <span class="prix">Inclus avec Expert (à confirmer)</span></p></div>
+<p class="mut" style="font-size:14px">Les tarifs ci-dessus sont encore à l'étude, ils peuvent changer.</p>
+<button id="wOk">Continuer</button></section>
+
+<section id="sReg" class="off"><h2>Créer un compte</h2>
+<p class="mut">Nom, prénom et e-mail sont obligatoires pour utiliser l'appli. La structure (asso, société) est facultative.</p>
+<label for="rNom">Nom</label><input type="text" id="rNom" autocomplete="family-name">
+<label for="rPrenom">Prénom</label><input type="text" id="rPrenom" autocomplete="given-name">
+<label for="rEmail">E-mail</label><input type="email" id="rEmail" autocomplete="email" inputmode="email">
+<label for="rOrg">Association ou société (facultatif)</label><input type="text" id="rOrg" autocomplete="organization">
+<p id="rErr" class="err" style="display:none"></p>
+<button id="rGo">Recevoir le code par e-mail</button></section>
+
+<section id="sVerify" class="off"><h2>Vérifie ton e-mail</h2>
+<p class="mut">Un code à 6 chiffres vient d'être envoyé à <strong id="vEmail"></strong>.</p>
+<input type="text" id="vCode" class="codeInput" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="------">
+<p id="vErr" class="err" style="display:none"></p>
+<button id="vGo">Valider</button>
+<button id="vResend" class="sec">Renvoyer le code</button></section>
+
+<section id="s1" class="off"><h2>1. Ton installation</h2>
 <label for="salle">Lieu</label>
 <select id="salle"><option value="1">Petite salle (bar, salle de classe)</option><option value="2" selected>Salle moyenne (salle des fêtes)</option><option value="3">Grande salle ou très réverbérante</option><option value="4">En plein air</option></select>
 <label for="proc">Avec quoi tu règles le son ?</label>
@@ -56,16 +95,29 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 <p id="st" class="mut"></p></section>
 
 <section id="s3" class="off"><h2>3. Résultat</h2>
+<div id="ai" style="display:none"></div>
 <div id="adv"></div>
 <details id="dt"><summary>Réglages précis (filtres)</summary>
 <div class="tbl"><table id="peq"></table></div></details>
 <div class="exp"><h2 style="margin-top:16px">Écart par bande</h2><div class="tbl"><table id="bands"></table></div><button id="cp" class="sec">Copier les filtres</button></div>
+<div id="fb"></div>
+<button id="goLive" class="sec">Passer en mode Live (pendant la soirée)</button>
 <button id="again" class="sec">Refaire une mesure</button></section>
+
+<section id="s4" class="off"><h2>Mode Live</h2>
+<p class="mut">Garde cette page ouverte pendant la soirée. La courbe suit la tendance du son sur plusieurs dizaines de secondes : les variations normales d'un morceau à l'autre ne déclenchent pas d'alerte. Évite de verrouiller l'écran, le micro se coupe sinon.</p>
+<span id="liveBadge" class="badge ok">Ça tient bon</span>
+<canvas id="cvLive" width="560" height="220"></canvas>
+<div id="liveLog"></div>
+<button id="liveReset" class="sec">Nouvelle référence maintenant</button>
+<button id="liveStop" class="sec">Quitter le mode live</button>
+</section>
 
 <script>
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
-let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null;
-const $=id=>document.getElementById(id),show=id=>{['s1','s2','s3'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
+let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','sReg','sVerify','s1','s2','s3','s4'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 $('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
 function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
@@ -75,7 +127,7 @@ function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
-function draw(v){const c=$('cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+function draw(v,id){const c=$(id||'cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
 const bw=W/B.length,mid=H/2,k=H/28;
 const zone=(lo,hi,col)=>{g.fillStyle=col;g.fillRect(0,mid-hi*k,W,(hi-lo)*k);g.fillRect(0,mid+lo*k,W,(hi-lo)*k)};
 zone(0,3,'rgba(122,155,110,.16)');zone(3,6,'rgba(242,169,0,.13)');zone(6,14,'rgba(184,92,78,.13)');
@@ -122,7 +174,38 @@ const DB=[
 const getProf=()=>{const s=($('brand').value+' '+$('model').value).toLowerCase();return DB.find(p=>p.re.test(s))||null};
 const upd=()=>{const p=getProf(),t=($('brand').value+$('model').value).trim();$('pf').textContent=p?'Appareil reconnu : '+p.name+(p.ok?'':' (profil à confirmer dans le manuel)'):t?'Appareil non reconnu : réglages génériques, adaptés au type choisi ci-dessus.':''};
 $('brand').oninput=$('model').oninput=upd;
-function result(d){show('s3');advice(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];const thr=V('thr',3),mc=V('mcut',6),qq=V('qv',0);
+// Adresse du relais Cloudflare Worker (voir worker.js) : à remplacer par la tienne une fois déployée.
+const AI_WORKER_URL='https://VOTRE-WORKER.VOTRE-SOUS-DOMAINE.workers.dev';
+let sampleFn=null;
+async function callAI(prompt){
+if(typeof claude!=='undefined'){
+if(sampleFn===null){try{sampleFn=await claude.use('sample')}catch(e){sampleFn=false}}
+if(sampleFn){const r=await sampleFn(prompt,{modelTier:'quick'});return String(r.text||'')}
+}
+if(AI_WORKER_URL.includes('VOTRE-WORKER'))throw new Error('worker non configuré');
+const res=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+if(!res.ok)throw new Error('http '+res.status);
+const j=await res.json();if(j.error)throw new Error(j.error);
+return String(j.text||'')}
+async function aiSummary(d){const box=$('ai');
+box.style.display='block';box.innerHTML='<span class="lbl">Résumé</span><p class="mut">Génération du résumé…</p>';
+try{
+const lieu=$('salle').selectedOptions[0].textContent,app=$('proc').selectedOptions[0].textContent;
+const marque=($('brand').value+' '+$('model').value).trim();
+const data=B.map((f,i)=>f+'Hz:'+(d[i]>0?'+':'')+d[i].toFixed(1)+'dB').join(', ');
+const prompt='Tu aides des bénévoles d\'association sans ingénieur du son à comprendre une mesure de leur sono. '
++'Lieu : '+lieu+'. Matériel : '+app+(marque?' ('+marque+')':'')+'. '
++'Écart mesuré par rapport à une réponse idéale, par bande de fréquence (positif = trop fort, négatif = trop faible) : '+data+'. '
++'Écris un résumé très court (3 phrases maximum), en français simple, sans jargon technique : une phrase pour dire ce que montre la mesure dans l\'ensemble, puis ce qui est le plus marquant à corriger. Pas de liste, pas de markdown, texte continu uniquement.';
+const txt=await callAI(prompt);
+box.innerHTML='<span class="lbl">Résumé</span><p>'+txt.replace(/</g,'&lt;')+'</p>';
+}catch(e){box.innerHTML='<span class="lbl">Résumé</span><p class="mut">Résumé indisponible pour le moment.</p>'}}
+function loadBias(){try{return JSON.parse(localStorage.getItem('cts_bias')||'{}')}catch(e){return{}}}
+function saveBias(b){try{localStorage.setItem('cts_bias',JSON.stringify(b))}catch(e){}}
+let lastCtx=null;
+function result(d){show('s3');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
+const bias=loadBias(),lieuKey=$('salle').value,bAdj=(bias[lieuKey]&&bias[lieuKey].thrAdj)||0;
+const thr=V('thr',3)+bAdj,mc=V('mcut',6),qq=V('qv',0);
 $('bands').innerHTML='<tr><th>Fréq.</th><th>Écart</th></tr>'+d.map((x,i)=>`<tr><td>${B[i]} Hz</td><td>${x>0?'+':''}${x.toFixed(1)} dB</td></tr>`).join('');
 const pr=getProf(),kind=pr?'peq':(+$('proc').value===3?'knob':'peq'),nn=Math.round(V('nf',pr?pr.n:+$('proc').value));
 d.forEach((x,i)=>{if(x>thr)c.push({f:B[i],g:-Math.min(mc,x-1),q:qq||(i<7?4:5),x})});
@@ -132,9 +215,89 @@ let h=pr?nt(pr.name+(pr.ok?'':' (profil à confirmer dans le manuel)')+'. '+pr.w
 if(kind==='knob'){h+=ti('Boutons à régler')+[['Graves',0,5],['Médiums',10,17],['Aigus',19,26]].map(([n,i,j])=>{const v=Math.max(-6,Math.min(6,-avg(d,i,j)));return row([n,Math.abs(v)<2?'Ne touche pas':(v>0?'+':'')+Math.round(v)+' dB'])}).join('')}
 else{h+=ti('Filtres paramétriques (type cloche)')+'<tr><th>N°</th><th>Fréq.</th><th>Gain</th><th>Q</th></tr>'+(sel.length?sel.map((f,i)=>row([i+1,f.f+' Hz',(Math.round(f.g*2)/2).toFixed(1)+' dB',f.q])).join(''):nt('Aucun filtre nécessaire.'));
 if(pr&&pr.geq&&c.length)h+=ti('Ou égaliseur graphique 31 bandes')+[...c].sort((p,q)=>p.f-q.f).map(f=>row([f.f+' Hz',Math.round(f.g)+' dB'])).join('')}
-h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h}
+h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h;
+lastCtx={lieuKey,thrUsed:thr};renderFeedback()}
+function renderFeedback(){$('fb').innerHTML='<p><strong>Ce résultat te convient ?</strong></p><div class="row"><button id="fbUp">👍 Oui</button><button id="fbDown" class="sec">👎 Pas vraiment</button></div>';
+$('fbUp').onclick=()=>sendFeedback(true);$('fbDown').onclick=()=>{$('fb').innerHTML+='<textarea id="fbTxt" placeholder="Qu\'est-ce qui ne va pas ? (facultatif)"></textarea><button id="fbSend">Envoyer</button>';$('fbSend').onclick=()=>sendFeedback(false,$('fbTxt').value)}}
+function sendFeedback(ok,comment){if(!lastCtx)return;const bias=loadBias(),k=lastCtx.lieuKey;bias[k]=bias[k]||{thrAdj:0};
+if(!ok)bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj+0.5));else bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj-0.15));
+saveBias(bias);
+if(!AI_WORKER_URL.includes('VOTRE-WORKER')){fetch(AI_WORKER_URL.replace(/\/$/,'')+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lieu:k,satisfied:ok,comment:comment||'',ts:Date.now()})}).catch(()=>{})}
+$('fb').innerHTML='<p class="thx">Merci, c\'est pris en compte pour les prochaines mesures.</p>'}
 $('again').onclick=()=>show('s2');
 const setM=e=>{document.body.classList.toggle('expert',e);$('mE').classList.toggle('on',e);$('mB').classList.toggle('on',!e);$('mE').setAttribute('aria-pressed',e);$('mB').setAttribute('aria-pressed',!e)};
 $('mB').onclick=()=>setM(false);$('mE').onclick=()=>setM(true);
 $('cp').onclick=async()=>{try{await navigator.clipboard.writeText([...$('peq').querySelectorAll('tr')].map(r=>[...r.cells].map(c=>c.textContent).join('\t')).join('\n'));$('cp').textContent='Copié'}catch(e){$('cp').textContent='Copie impossible'}};
+const LIVE_TAU=45;
+async function wakeLockReq(){try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){wakeLock=null}}
+function wakeLockStop(){try{wakeLock&&wakeLock.release()}catch(e){}wakeLock=null}
+function logLive(msg){const t=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});$('liveLog').insertAdjacentHTML('afterbegin',`<div class="li">${t} — ${msg}</div>`)}
+function updateBadge(drift){const mx=Math.max(...drift.map(Math.abs)),el=$('liveBadge');
+if(mx<3){el.textContent='Ça tient bon';el.className='badge ok'}
+else if(mx<6){el.textContent='Petite dérive';el.className='badge warn'}
+else{el.textContent='Dérive marquée';el.className='badge bad'}}
+function checkAlerts(drift){const now=Date.now();
+drift.forEach((x,i)=>{const bad=Math.abs(x)>5;
+if(bad){if(!alertSince[i])alertSince[i]=now;const dur=(now-alertSince[i])/1000,cooled=!alertLast[i]||(now-alertLast[i])>300000;
+if(dur>25&&cooled){alertLast[i]=now;logLive(x>0?`Ça monte vers ${B[i]} Hz depuis un moment.`:`Ça manque vers ${B[i]} Hz depuis un moment.`)}}
+else{alertSince[i]=null}})}
+function liveTick(){if(!an||!liveBase)return;const l=levels();
+liveEma=liveEma?liveEma.map((v,i)=>v+(l[i]-v)/LIVE_TAU):l.slice();
+const drift=liveEma.map((v,i)=>v-liveBase[i]);
+draw(drift,'cvLive');updateBadge(drift);checkAlerts(drift)}
+$('goLive').onclick=async()=>{if(!dev)return;await liveInfoModal();liveBase=dev.slice();liveEma=null;alertSince={};alertLast={};liveOn=true;
+$('liveLog').innerHTML='';show('s4');wakeLockReq();clearInterval(liveTimer);liveTimer=setInterval(liveTick,1000);liveTick()};
+$('liveReset').onclick=()=>{if(liveEma)liveBase=liveEma.slice();alertSince={};alertLast={};logLive('Nouvelle référence prise en compte.')};
+$('liveStop').onclick=()=>{liveOn=false;clearInterval(liveTimer);wakeLockStop();show('s3')};
+
+// --- Pop-up d'explication du mode Live ---
+function liveInfoModal(){return new Promise(res=>{
+if(localStorage.getItem('cts_liveinfo')==='1')return res();
+const m=document.createElement('div');m.className='modal';
+m.innerHTML=`<div class="box"><h2 style="margin-top:0">Avant de lancer le Live</h2>
+<p>Laisse cette page ouverte, à l'écran, pendant toute la soirée : le micro se coupe si tu verrouilles le téléphone ou si tu changes d'appli.</p>
+<p>Pose le téléphone à un endroit stable, côté public, loin des enceintes.</p>
+<p>L'appli compare le son en cours à ta mesure de départ : attends quelques minutes après le début pour que la courbe se stabilise.</p>
+<label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:14px 0"><input type="checkbox" id="liveInfoSkip" style="width:auto">Ne plus afficher ce message</label>
+<button id="liveInfoOk">J'ai compris, démarrer</button></div>`;
+document.body.appendChild(m);
+$('liveInfoOk').onclick=()=>{if($('liveInfoSkip').checked)localStorage.setItem('cts_liveinfo','1');m.remove();res()}})}
+
+// --- Inscription / vérification ---
+let regData=null;
+function emailOk(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)}
+function backendReady(){return !AI_WORKER_URL.includes('VOTRE-WORKER')}
+function showErr(id,msg){const e=$(id);e.textContent=msg;e.style.display=msg?'block':'none'}
+$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('sReg')};
+$('rGo').onclick=async()=>{showErr('rErr','');
+const nom=$('rNom').value.trim(),prenom=$('rPrenom').value.trim(),email=$('rEmail').value.trim(),org=$('rOrg').value.trim();
+if(!nom||!prenom){showErr('rErr','Nom et prénom sont obligatoires.');return}
+if(!emailOk(email)){showErr('rErr','Adresse e-mail invalide.');return}
+if(!backendReady()){showErr('rErr',"L'inscription n'est pas encore activée, reviens un peu plus tard.");return}
+$('rGo').disabled=true;$('rGo').textContent='Envoi…';
+try{
+const res=await fetch(AI_WORKER_URL.replace(/\/$/,'')+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nom,prenom,email,organisation:org})});
+const j=await res.json();
+if(!res.ok||j.error){showErr('rErr',j.error==='disposable'?'Les adresses e-mail jetables ne sont pas acceptées.':j.error==='exists'?'Ce compte existe déjà, vérifie ta boîte mail ou connecte-toi.':'Inscription impossible, réessaie.');$('rGo').disabled=false;$('rGo').textContent='Recevoir le code par e-mail';return}
+regData={nom,prenom,email,organisation:org};$('vEmail').textContent=email;$('vCode').value='';showErr('vErr','');show('sVerify')
+}catch(e){showErr('rErr','Connexion impossible, réessaie.')}
+$('rGo').disabled=false;$('rGo').textContent='Recevoir le code par e-mail'};
+$('vGo').onclick=async()=>{if(!regData)return;showErr('vErr','');const code=$('vCode').value.trim();
+if(!/^[0-9]{6}$/.test(code)){showErr('vErr','Entre les 6 chiffres reçus par e-mail.');return}
+$('vGo').disabled=true;
+try{
+const res=await fetch(AI_WORKER_URL.replace(/\/$/,'')+'/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:regData.email,code})});
+const j=await res.json();
+if(!res.ok||j.error){showErr('vErr',j.error==='expired'?'Ce code a expiré, demande-en un nouveau.':'Code incorrect.');$('vGo').disabled=false;return}
+localStorage.setItem('cts_session',JSON.stringify(regData));show('s1')
+}catch(e){showErr('vErr','Connexion impossible, réessaie.')}
+$('vGo').disabled=false};
+$('vResend').onclick=()=>{if(!regData)return;fetch(AI_WORKER_URL.replace(/\/$/,'')+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(regData)}).catch(()=>{});$('vResend').textContent='Code renvoyé';setTimeout(()=>$('vResend').textContent='Renvoyer le code',4000)};
+
+// --- Démarrage ---
+(function boot(){
+const sess=localStorage.getItem('cts_session');
+if(sess){try{regData=JSON.parse(sess);show('s1');return}catch(e){}}
+if(localStorage.getItem('cts_seenintro')){show('sReg')}else{show('sWelcome')}
+})();
 </script></body></html>
