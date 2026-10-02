@@ -175,7 +175,7 @@ const getProf=()=>{const s=($('brand').value+' '+$('model').value).toLowerCase()
 const upd=()=>{const p=getProf(),t=($('brand').value+$('model').value).trim();$('pf').textContent=p?'Appareil reconnu : '+p.name+(p.ok?'':' (profil à confirmer dans le manuel)'):t?'Appareil non reconnu : réglages génériques, adaptés au type choisi ci-dessus.':''};
 $('brand').oninput=$('model').oninput=upd;
 // Adresse du relais Cloudflare Worker (voir worker.js) : à remplacer par la tienne une fois déployée.
-const AI_WORKER_URL='https://VOTRE-WORKER.VOTRE-SOUS-DOMAINE.workers.dev';
+const AI_WORKER_URL='https://cts-backend.4ps2vm9yhc.workers.dev';
 let sampleFn=null;
 async function callAI(prompt){
 if(typeof claude!=='undefined'){
