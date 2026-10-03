@@ -279,9 +279,10 @@ if(sampleFn){const r=await sampleFn(prompt,{modelTier:'quick'});return String(r.
 }
 if(AI_WORKER_URL.includes('VOTRE-WORKER'))throw new Error('worker non configuré');
 const res=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
-if(!res.ok)throw new Error('http '+res.status);
-const j=await res.json();if(j.error)throw new Error(j.error);
-return String(j.text||'')}
+let j=null;try{j=await res.json()}catch(e){}
+if(!res.ok)throw new Error((j&&j.error)?j.error:('http '+res.status));
+if(j&&j.error)throw new Error(j.error);
+return String((j&&j.text)||'')}
 async function aiSummary(d){const box=$('ai');
 box.style.display='block';box.innerHTML='<span class="lbl">Résumé</span><p class="mut">Génération du résumé…</p>';
 try{
