@@ -40,9 +40,29 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 .modal .box{background:var(--pn);border:1px solid var(--ln);border-radius:14px 14px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%}
 .err{color:var(--bad);margin:-6px 0 10px;font-size:14px}
 .codeInput{letter-spacing:8px;font-size:24px;text-align:center}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative}
+.menuWrap{position:relative;flex:none}
+.iconBtn{width:auto;margin:0;padding:10px 14px;font-size:20px;line-height:1;background:transparent;border:2px solid var(--ln);border-radius:8px;color:var(--fg)}
+.dropdown{position:absolute;right:0;top:calc(100% + 8px);background:var(--pn);border:1px solid var(--ln);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.45);min-width:210px;z-index:40;overflow:hidden}
+.dropdown.off{display:none}
+.dropdown button{width:100%;margin:0;background:transparent;border:0;border-radius:0;color:var(--fg);text-align:left;padding:13px 16px;font-weight:600}
+.dropdown button+button{border-top:1px solid var(--ln)}
+.dropdown button:active{background:rgba(255,255,255,.06)}
+.histCard{padding:12px 0;border-top:1px solid var(--ln)}.histCard:first-child{border-top:0}
 </style></head><body>
-<h1>CTS</h1>
-<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p>
+<header>
+<div><h1>CTS</h1>
+<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p></div>
+<div class="menuWrap">
+<button id="menuBtn" class="iconBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">☰</button>
+<div id="menuDrop" class="dropdown off" role="menu">
+<button id="mHome" role="menuitem">Accueil</button>
+<button id="mNew" role="menuitem">Choix d'analyse</button>
+<button id="mHist" role="menuitem">Analyses passées</button>
+<button id="mCgu" role="menuitem">CGU</button>
+</div>
+</div>
+</header>
 <p class="mut">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p>
 <div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button></div>
 
@@ -100,11 +120,60 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 <button id="liveStop" class="sec">Quitter le mode live</button>
 </section>
 
+<section id="sHist" class="off"><h2>Analyses passées</h2>
+<div id="histList"></div>
+<div id="histDetail" class="off"></div>
+<button id="histClear" class="sec">Effacer l'historique</button>
+<button id="histClose" class="sec">Fermer</button>
+</section>
+
+<section id="sCGU" class="off"><h2>Conditions générales d'utilisation</h2>
+<p class="mut">Dernière mise à jour : octobre 2026</p>
+<p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
+<p>Les mesures et conseils fournis sont approximatifs et dépendent de la qualité du micro, du lieu et des réglages. CTS et son auteur déclinent toute responsabilité en cas de dommage matériel (enceintes, amplis) lié à l'utilisation de l'outil : vérifie toujours tes niveaux avant d'augmenter un réglage.</p>
+<p>L'accès au micro sert uniquement à l'analyse en direct, dans ton navigateur. Aucun enregistrement audio n'est envoyé ni conservé.</p>
+<p>Tes réglages, ton historique d'analyses et tes préférences sont stockés uniquement sur ton appareil (stockage local du navigateur). Rien n'est transmis à un serveur, sauf si tu envoies volontairement un retour (👍/👎 et commentaire), utilisé pour améliorer l'outil.</p>
+<p>CTS est un projet personnel en développement, fourni « en l'état », sans garantie. Il peut évoluer ou être interrompu à tout moment.</p>
+<button id="cguBack" class="sec">Retour</button>
+</section>
+
 <script>
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+let mesInterval=null;
+function leaveCurrent(){
+if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
+if(mesInterval){clearInterval(mesInterval);mesInterval=null;mesuring=false;$('bmes').disabled=false;$('bmes').classList.remove('on');$('bmes').querySelector('.lbl').textContent='Analyser';$('bmesProg').style.transition='none';$('bmesProg').style.width='0%'}
+if(noise){try{noise.stop()}catch(e){}noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}
+}
+function loadHistory(){try{return JSON.parse(localStorage.getItem('cts_history')||'[]')}catch(e){return[]}}
+function saveHistory(rec){const h=loadHistory();h.unshift(rec);if(h.length>20)h.length=20;try{localStorage.setItem('cts_history',JSON.stringify(h))}catch(e){}}
+function renderHistory(){const h=loadHistory(),box=$('histList');
+if(!h.length){box.innerHTML='<p class="mut">Aucune analyse enregistrée pour l\'instant.</p>';return}
+box.innerHTML=h.map((r,i)=>{const d=new Date(r.ts),date=d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+return `<div class="histCard"><strong>${date}</strong><br><span class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</span><br><button class="sec" data-i="${i}" style="margin-top:8px">Voir le détail</button></div>`}).join('');
+box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>showHistDetail(h[+b.dataset.i]))}
+function showHistDetail(r){const d=new Date(r.ts);
+$('histDetail').innerHTML=`<h3 style="margin-top:0">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</h3>
+<p class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</p>
+<div>${r.advHtml}</div>
+<details open><summary>Réglages précis (filtres)</summary><div class="tbl"><table>${r.peqHtml}</table></div></details>
+<button id="histBack" class="sec">Retour à la liste</button>`;
+$('histList').classList.add('off');$('histDetail').classList.remove('off');
+$('histBack').onclick=()=>{$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off')}}
+$('histClear').onclick=()=>{if(confirm('Effacer toutes les analyses enregistrées ?')){localStorage.removeItem('cts_history');renderHistory()}};
+$('histClose').onclick=()=>show('s1');
+$('cguBack').onclick=()=>show('s1');
+const menuBtn=$('menuBtn'),menuDrop=$('menuDrop');
+function closeMenu(){menuDrop.classList.add('off');menuBtn.setAttribute('aria-expanded','false')}
+menuBtn.onclick=e=>{e.stopPropagation();const willOpen=menuDrop.classList.contains('off');menuDrop.classList.toggle('off');menuBtn.setAttribute('aria-expanded',String(willOpen))};
+document.addEventListener('click',e=>{if(!menuDrop.contains(e.target)&&e.target!==menuBtn)closeMenu()});
+$('mHome').onclick=()=>{closeMenu();leaveCurrent();show('sWelcome')};
+$('mNew').onclick=()=>{closeMenu();leaveCurrent();show('s1')};
+$('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');renderHistory();show('sHist')};
+$('mCgu').onclick=()=>{closeMenu();leaveCurrent();show('sCGU')};
 $('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
 function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
@@ -139,7 +208,7 @@ const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[
 noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').classList.add('on');$('bnoise').querySelector('.lbl').textContent='Arrêter le bruit rose'};
 $('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
 requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.style.width='100%'});
-lbl.textContent='Mesure… '+t+' s';const iv=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(iv);mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
+lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
 dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}result(dev)}},1000)};
 const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
 function advice(d){const a=[],s=$('salle').value,g=avg(d,0,4),h=avg(d,19,26),m=avg(d,5,9);
@@ -205,7 +274,9 @@ if(kind==='knob'){h+=ti('Boutons à régler')+[['Graves',0,5],['Médiums',10,17]
 else{h+=ti('Filtres paramétriques (type cloche)')+'<tr><th>N°</th><th>Fréq.</th><th>Gain</th><th>Q</th></tr>'+(sel.length?sel.map((f,i)=>row([i+1,f.f+' Hz',(Math.round(f.g*2)/2).toFixed(1)+' dB',f.q])).join(''):nt('Aucun filtre nécessaire.'));
 if(pr&&pr.geq&&c.length)h+=ti('Ou égaliseur graphique 31 bandes')+[...c].sort((p,q)=>p.f-q.f).map(f=>row([f.f+' Hz',Math.round(f.g)+' dB'])).join('')}
 h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h;
-lastCtx={lieuKey,thrUsed:thr};renderFeedback()}
+lastCtx={lieuKey,thrUsed:thr};
+saveHistory({ts:Date.now(),lieu:$('salle').selectedOptions[0].textContent,appareil:($('brand').value+' '+$('model').value).trim(),advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML});
+renderFeedback()}
 function renderFeedback(){$('fb').innerHTML='<p><strong>Ce résultat te convient ?</strong></p><div class="row"><button id="fbUp">👍 Oui</button><button id="fbDown" class="sec">👎 Pas vraiment</button></div>';
 $('fbUp').onclick=()=>sendFeedback(true);$('fbDown').onclick=()=>{$('fb').innerHTML+='<textarea id="fbTxt" placeholder="Qu\'est-ce qui ne va pas ? (facultatif)"></textarea><button id="fbSend">Envoyer</button>';$('fbSend').onclick=()=>sendFeedback(false,$('fbTxt').value)}}
 function sendFeedback(ok,comment){if(!lastCtx)return;const bias=loadBias(),k=lastCtx.lieuKey;bias[k]=bias[k]||{thrAdj:0};
