@@ -49,6 +49,11 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 .dropdown button+button{border-top:1px solid var(--ln)}
 .dropdown button:active{background:rgba(255,255,255,.06)}
 .histCard{padding:12px 0;border-top:1px solid var(--ln)}.histCard:first-child{border-top:0}
+#chatLog{max-height:52vh;overflow-y:auto;margin-bottom:4px;padding-right:2px}
+.msg{padding:10px 14px;border-radius:10px;margin:8px 0;max-width:85%;white-space:pre-wrap;line-height:1.42}
+.msg.u{background:var(--ac);color:#f3ead9;margin-left:auto}
+.msg.a{background:var(--bg);border:1px solid var(--ln)}
+#chatInput{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);resize:vertical;margin-top:10px}
 </style></head><body>
 <header>
 <div><h1>CTS</h1>
@@ -59,6 +64,7 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <button id="mHome" role="menuitem">Accueil</button>
 <button id="mNew" role="menuitem">Choix d'analyse</button>
 <button id="mHist" role="menuitem">Analyses passées</button>
+<button id="mChat" role="menuitem">Assistant IA</button>
 <button id="mCgu" role="menuitem">CGU</button>
 </div>
 </div>
@@ -127,6 +133,16 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <button id="histClose" class="sec">Fermer</button>
 </section>
 
+<section id="sChat" class="off"><h2>Assistant IA</h2>
+<p class="mut">Pose tes questions sur le matos, les réglages, la disposition des enceintes, le dépannage, etc. Réponses générées automatiquement : vérifie les points importants dans le manuel de ton appareil.</p>
+<div id="chatLog"></div>
+<div id="chatTyping" class="mut" style="display:none">L'assistant écrit…</div>
+<textarea id="chatInput" rows="2" placeholder="Ex. : Comment éviter le larsen avec un micro sans fil ?"></textarea>
+<button id="chatSend"><span class="lbl">Envoyer</span></button>
+<button id="chatClear" class="sec">Effacer la conversation</button>
+<button id="chatClose" class="sec">Fermer</button>
+</section>
+
 <section id="sCGU" class="off"><h2>Conditions générales d'utilisation</h2>
 <p class="mut">Dernière mise à jour : octobre 2026</p>
 <p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
@@ -141,7 +157,7 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 let mesInterval=null;
 function leaveCurrent(){
 if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
@@ -173,7 +189,28 @@ document.addEventListener('click',e=>{if(!menuDrop.contains(e.target)&&e.target!
 $('mHome').onclick=()=>{closeMenu();leaveCurrent();show('sWelcome')};
 $('mNew').onclick=()=>{closeMenu();leaveCurrent();show('s1')};
 $('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');renderHistory();show('sHist')};
+$('mChat').onclick=()=>{closeMenu();leaveCurrent();renderChat();show('sChat')};
 $('mCgu').onclick=()=>{closeMenu();leaveCurrent();show('sCGU')};
+// --- Assistant IA ---
+const CHAT_SYS="Tu es l'assistant intégré à CTS (Cales Ta Sono), une appli qui aide des bénévoles d'association à régler une sonorisation sans ingénieur du son. Tu es un expert reconnu en sonorisation : matériel (tables de mixage analogiques et numériques, processeurs d'enceintes type DriveRack/miniDSP/Lake, amplis, enceintes actives et passives, subwoofers, micros filaires et HF), réglages (structure de gain, égalisation, compression, limiteur, crossover, délai, polarité), disposition des enceintes (stack au sol, accroche/fly, line array, couverture et dispersion, placement des subs en cardioïde / end-fire / gradient), acoustique de salle selon le type de lieu, gestion du larsen et du feedback, dépannage courant (ronflette, bruit, pas de son, distorsion, coupures), et sécurité (niveaux SPL, protection auditive, ne pas pousser un système en clipping).\n"+
+"Réponds toujours en français, de façon claire, concrète et actionnable, adaptée à des bénévoles sans formation technique : évite le jargon inutile, et quand un terme technique est nécessaire, explique-le brièvement entre parenthèses. Reste concis (quelques phrases ou une courte liste), va droit à l'essentiel, pas de markdown. Si la question dépend du matériel exact de l'utilisateur et qu'il ne l'a pas précisé, donne d'abord une réponse générale utile puis demande la précision. Rappelle brièvement un risque quand une manipulation en présente un (matériel ou oreilles du public). Pour une installation complexe ou critique, précise que ça reste utile de faire appel à un ingénieur du son, sans le répéter à chaque réponse.";
+function loadChat(){try{return JSON.parse(localStorage.getItem('cts_chat')||'[]')}catch(e){return[]}}
+function saveChat(h){try{localStorage.setItem('cts_chat',JSON.stringify(h.slice(-60)))}catch(e){}}
+let chatHist=loadChat();
+function renderChat(){$('chatLog').innerHTML=chatHist.length?chatHist.map(m=>`<div class="msg ${m.r}">${m.t.replace(/</g,'&lt;')}</div>`).join(''):'<p class="mut">Pose ta première question ci-dessous.</p>';$('chatLog').scrollTop=$('chatLog').scrollHeight}
+function buildChatPrompt(newMsg){const recent=chatHist.slice(-10);let t=CHAT_SYS+'\n\nConversation :\n';
+recent.forEach(m=>{t+=(m.r==='u'?'Utilisateur : ':'Assistant : ')+m.t+'\n'});
+t+='Utilisateur : '+newMsg+'\nAssistant :';return t}
+async function sendChat(){const txt=$('chatInput').value.trim();if(!txt)return;
+chatHist.push({r:'u',t:txt});saveChat(chatHist);renderChat();$('chatInput').value='';
+$('chatSend').disabled=true;$('chatTyping').style.display='block';
+try{const reply=await callAI(buildChatPrompt(txt));chatHist.push({r:'a',t:(reply||'').trim()||"Je n'ai pas de réponse à proposer, reformule peut-être ta question."})}
+catch(e){chatHist.push({r:'a',t:"Assistant indisponible pour le moment. Réessaie dans un instant."})}
+saveChat(chatHist);renderChat();$('chatTyping').style.display='none';$('chatSend').disabled=false}
+$('chatSend').onclick=sendChat;
+$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
+$('chatClear').onclick=()=>{if(confirm('Effacer toute la conversation ?')){chatHist=[];saveChat(chatHist);renderChat()}};
+$('chatClose').onclick=()=>show('s1');
 $('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
 function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
