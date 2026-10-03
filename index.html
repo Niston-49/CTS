@@ -198,14 +198,14 @@ function loadChat(){try{return JSON.parse(localStorage.getItem('cts_chat')||'[]'
 function saveChat(h){try{localStorage.setItem('cts_chat',JSON.stringify(h.slice(-60)))}catch(e){}}
 let chatHist=loadChat();
 function renderChat(){$('chatLog').innerHTML=chatHist.length?chatHist.map(m=>`<div class="msg ${m.r}">${m.t.replace(/</g,'&lt;')}</div>`).join(''):'<p class="mut">Pose ta première question ci-dessous.</p>';$('chatLog').scrollTop=$('chatLog').scrollHeight}
-function buildChatPrompt(newMsg){const recent=chatHist.slice(-10);let t=CHAT_SYS+'\n\nConversation :\n';
+function buildChatPrompt(newMsg){const recent=chatHist.slice(-6);let t=CHAT_SYS+'\n\nConversation :\n';
 recent.forEach(m=>{t+=(m.r==='u'?'Utilisateur : ':'Assistant : ')+m.t+'\n'});
 t+='Utilisateur : '+newMsg+'\nAssistant :';return t}
 async function sendChat(){const txt=$('chatInput').value.trim();if(!txt)return;
 chatHist.push({r:'u',t:txt});saveChat(chatHist);renderChat();$('chatInput').value='';
 $('chatSend').disabled=true;$('chatTyping').style.display='block';
 try{const reply=await callAI(buildChatPrompt(txt));chatHist.push({r:'a',t:(reply||'').trim()||"Je n'ai pas de réponse à proposer, reformule peut-être ta question."})}
-catch(e){chatHist.push({r:'a',t:"Assistant indisponible pour le moment. Réessaie dans un instant."})}
+catch(e){chatHist.push({r:'a',t:"Assistant indisponible pour le moment (détail technique : "+(e&&e.message?e.message:String(e))+"). Réessaie dans un instant."})}
 saveChat(chatHist);renderChat();$('chatTyping').style.display='none';$('chatSend').disabled=false}
 $('chatSend').onclick=sendChat;
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
@@ -294,7 +294,7 @@ const prompt='Tu aides des bénévoles d\'association sans ingénieur du son à 
 +'Écris un résumé très court (3 phrases maximum), en français simple, sans jargon technique : une phrase pour dire ce que montre la mesure dans l\'ensemble, puis ce qui est le plus marquant à corriger. Pas de liste, pas de markdown, texte continu uniquement.';
 const txt=await callAI(prompt);
 box.innerHTML='<span class="lbl">Résumé</span><p>'+txt.replace(/</g,'&lt;')+'</p>';
-}catch(e){box.innerHTML='<span class="lbl">Résumé</span><p class="mut">Résumé indisponible pour le moment.</p>'}}
+}catch(e){box.innerHTML='<span class="lbl">Résumé</span><p class="mut">Résumé indisponible pour le moment (détail technique : '+(e&&e.message?e.message:String(e))+').</p>'}}
 function loadBias(){try{return JSON.parse(localStorage.getItem('cts_bias')||'{}')}catch(e){return{}}}
 function saveBias(b){try{localStorage.setItem('cts_bias',JSON.stringify(b))}catch(e){}}
 let lastCtx=null;
