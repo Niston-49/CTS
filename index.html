@@ -13,8 +13,12 @@ section{background:var(--pn);border:1px solid var(--ln);border-radius:10px;paddi
 section.off{display:none}
 label{display:block;font-weight:700;margin:12px 0 4px}
 select,input[type=file]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}
-button{font:700 18px inherit;font-family:inherit;padding:14px 18px;border-radius:8px;border:0;background:var(--ac);color:#f3ead9;width:100%;margin-top:12px}
+button{font:700 18px inherit;font-family:inherit;padding:14px 18px;border-radius:8px;border:0;background:var(--ac);color:#f3ead9;width:100%;margin-top:12px;position:relative;overflow:hidden}
 button.sec{background:transparent;color:var(--fg);border:2px solid var(--ln)}
+button.on{background:var(--ok);border-color:var(--ok)}
+button:disabled{opacity:.75}
+button .prog{position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(255,255,255,.28);z-index:0}
+button .lbl{position:relative;z-index:1}
 button:focus-visible,select:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:8px}
 .li{padding:10px 0;border-top:1px solid var(--ln)}.li:first-child{border:0}
@@ -72,9 +76,9 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 <section id="s2" class="off"><h2>2. Mesure</h2>
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
-<button id="bmic">Activer le micro</button>
-<button id="bnoise" class="sec" disabled>Lancer le bruit rose</button>
-<button id="bmes" disabled>Analyser</button>
+<button id="bmic"><span class="lbl">Activer le micro</span></button>
+<button id="bnoise" disabled><span class="lbl">Lancer le bruit rose</span></button>
+<button id="bmes" disabled><span class="lbl">Analyser</span><span class="prog" id="bmesProg"></span></button>
 <p id="st" class="mut"></p></section>
 
 <section id="s3" class="off"><h2>3. Résultat</h2>
@@ -126,15 +130,17 @@ g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
 $('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;ctx.createMediaStreamSource(stream).connect(an);
-$('bmic').style.display='none';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop()}
+$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
-$('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose';return}
+$('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose';return}
 const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
 for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
 const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[len-xf+i]*(1-k)+s*k}
-noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').textContent='Arrêter le bruit rose'};
-$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));$('bmes').disabled=true;$('bmes').textContent='Mesure… '+t+' s';const iv=setInterval(()=>{t--;$('bmes').textContent='Mesure… '+t+' s';if(t<0){clearInterval(iv);mesuring=false;$('bmes').textContent='Analyser';$('bmes').disabled=false;
-dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').textContent='Lancer le bruit rose'}result(dev)}},1000)};
+noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').classList.add('on');$('bnoise').querySelector('.lbl').textContent='Arrêter le bruit rose'};
+$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
+requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.style.width='100%'});
+lbl.textContent='Mesure… '+t+' s';const iv=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(iv);mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
+dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}result(dev)}},1000)};
 const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
 function advice(d){const a=[],s=$('salle').value,g=avg(d,0,4),h=avg(d,19,26),m=avg(d,5,9);
 const add=(c,t)=>a.push(`<div class="li"><span class="tag ${c}">${c==='ok'?'OK':'À régler'}</span>${t}</div>`);
