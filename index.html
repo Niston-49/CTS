@@ -170,6 +170,7 @@ canvas{height:280px}
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
 <button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
+<div id="inWrap" style="display:none"><label for="inSel">Microphone utilisé</label><select id="inSel"></select></div>
 <div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
 <button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
 <button id="bmes" disabled><span class="lbl">📊 Analyser</span><span class="prog" id="bmesProg"></span></button>
@@ -373,10 +374,23 @@ g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){cons
 g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke()}
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
 $('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;ctx.createMediaStreamSource(stream).connect(an);
+ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;src=ctx.createMediaStreamSource(stream);src.connect(an);
 $('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop();
-setupOutputPicker()}
+setupInputPicker();setupOutputPicker()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
+async function setupInputPicker(){
+try{const devs=await navigator.mediaDevices.enumerateDevices();const ins=devs.filter(d=>d.kind==='audioinput');
+if(ins.length<2)return;
+$('inSel').innerHTML=ins.map(d=>`<option value="${d.deviceId}">${d.label||'Microphone'}</option>`).join('');
+const current=stream.getAudioTracks()[0];if(current&&current.getSettings&&current.getSettings().deviceId)$('inSel').value=current.getSettings().deviceId;
+$('inWrap').style.display='block';
+$('inSel').onchange=async()=>{const id=$('inSel').value;try{
+const newStream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:id},echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+if(src)src.disconnect();if(stream)stream.getTracks().forEach(t=>t.stop());
+stream=newStream;src=ctx.createMediaStreamSource(stream);src.connect(an);
+$('st').textContent='Micro changé : '+( $('inSel').selectedOptions[0]?.textContent||'' );
+}catch(e){$('st').textContent='Impossible de passer sur ce micro.'}}
+}catch(e){}}
 async function setupOutputPicker(){
 if(!(ctx&&'setSinkId' in ctx))return;
 try{const devs=await navigator.mediaDevices.enumerateDevices();const outs=devs.filter(d=>d.kind==='audiooutput');
