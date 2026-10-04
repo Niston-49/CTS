@@ -2,6 +2,13 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CTS</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0b0a08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CTS">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0b0a08;--fg:#e8dcc5;--mut:#a69878;--pn:#161410;--ac:#2f86c7;--ok:#7a9b6e;--bad:#b85c4e;--ln:#332e24;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -40,6 +47,13 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 .modal .box{background:var(--pn);border:1px solid var(--ln);border-radius:14px 14px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%}
 .err{color:var(--bad);margin:-6px 0 10px;font-size:14px}
 .codeInput{letter-spacing:8px;font-size:24px;text-align:center}
+@media print{
+body *{visibility:hidden}
+#s3,#s3 *{visibility:visible}
+#s3{position:absolute;left:0;top:0;width:100%;border:none;box-shadow:none;background:#fff;color:#000}
+#ai{background:none;border-color:#000}
+#cmpWrap,#fb,#exportBtn,#goLive,#again,.badge{display:none!important}
+}
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative}
 .menuWrap{position:relative;flex:none}
 .iconBtn{width:auto;margin:0;padding:10px 14px;font-size:20px;line-height:1;background:transparent;border:2px solid var(--ln);border-radius:8px;color:var(--fg)}
@@ -49,6 +63,9 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 .dropdown button+button{border-top:1px solid var(--ln)}
 .dropdown button:active{background:rgba(255,255,255,.06)}
 .histCard{padding:12px 0;border-top:1px solid var(--ln)}.histCard:first-child{border-top:0}
+.histMini{height:80px;background:var(--bg);border-radius:6px;margin-top:8px}
+.row3{display:flex;gap:8px}.row3 button{margin-top:8px;flex:1}
+#cmpWrap{margin-top:16px}
 #chatLog{max-height:52vh;overflow-y:auto;margin-bottom:4px;padding-right:2px}
 .msg{padding:10px 14px;border-radius:10px;margin:8px 0;max-width:85%;white-space:pre-wrap;line-height:1.42}
 .msg.u{background:var(--ac);color:#f3ead9;margin-left:auto}
@@ -61,11 +78,12 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <div class="menuWrap">
 <button id="menuBtn" class="iconBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">☰</button>
 <div id="menuDrop" class="dropdown off" role="menu">
-<button id="mHome" role="menuitem">Accueil</button>
-<button id="mNew" role="menuitem">Choix d'analyse</button>
-<button id="mHist" role="menuitem">Analyses passées</button>
-<button id="mChat" role="menuitem">Assistant IA</button>
-<button id="mCgu" role="menuitem">CGU</button>
+<button id="mHome" role="menuitem">🏠 Accueil</button>
+<button id="mNew" role="menuitem">🎛️ Choix d'analyse</button>
+<button id="mHist" role="menuitem">📜 Analyses passées</button>
+<button id="mChat" role="menuitem">🤖 Assistant IA</button>
+<button id="mChecklist" role="menuitem">✅ Checklist avant concert</button>
+<button id="mCgu" role="menuitem">📄 CGU</button>
 </div>
 </div>
 </header>
@@ -79,8 +97,11 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec des alertes douces en cas de dérive du son.</p></div>
 <button id="wOk">Continuer</button></section>
 
-<section id="s1" class="off"><h2>1. Ton installation</h2>
-<label for="salle">Lieu</label>
+<section id="s1" class="off"><h2>Étape 1/3 — Ton installation</h2>
+<label for="profSel">📂 Profil de salle enregistré</label>
+<select id="profSel"><option value="">— Aucun —</option></select>
+<div class="row3"><button id="profLoad" class="sec">Charger</button><button id="profSave" class="sec">💾 Enregistrer</button><button id="profDel" class="sec">Supprimer</button></div>
+<label for="salle" style="margin-top:18px">Lieu</label>
 <select id="salle"><option value="1">Petite salle (bar, salle de classe)</option><option value="2" selected>Salle moyenne (salle des fêtes)</option><option value="3">Grande salle ou très réverbérante</option><option value="4">En plein air</option></select>
 <label for="proc">Avec quoi tu règles le son ?</label>
 <p class="mut" style="margin:0 0 6px">C'est l'appareil où tu règles le son avant les enceintes. Pas sûr ? Laisse « Je ne sais pas ».</p>
@@ -99,23 +120,27 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <label for="nf">Nombre de filtres disponibles (vide = selon l'appareil)</label><input type="number" id="nf" min="1" max="31"></div>
 <button id="go1">Continuer</button></section>
 
-<section id="s2" class="off"><h2>2. Mesure</h2>
+<section id="s2" class="off"><h2>Étape 2/3 — Mesure</h2>
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
-<button id="bmic"><span class="lbl">Activer le micro</span></button>
-<button id="bnoise" disabled><span class="lbl">Lancer le bruit rose</span></button>
-<button id="bmes" disabled><span class="lbl">Analyser</span><span class="prog" id="bmesProg"></span></button>
+<button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
+<button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
+<button id="bmes" disabled><span class="lbl">📊 Analyser</span><span class="prog" id="bmesProg"></span></button>
 <p id="st" class="mut"></p></section>
 
-<section id="s3" class="off"><h2>3. Résultat</h2>
+<section id="s3" class="off"><h2>Étape 3/3 — Résultat</h2>
 <div id="ai" style="display:none"></div>
+<canvas id="cvRes" width="560" height="220"></canvas>
+<div id="cmpWrap"><label for="cmpSel">Comparer à une analyse précédente</label>
+<select id="cmpSel"><option value="">— Aucune —</option></select></div>
 <div id="adv"></div>
 <details id="dt"><summary>Réglages précis (filtres)</summary>
 <div class="tbl"><table id="peq"></table></div></details>
 <div class="exp"><h2 style="margin-top:16px">Écart par bande</h2><div class="tbl"><table id="bands"></table></div><button id="cp" class="sec">Copier les filtres</button></div>
 <div id="fb"></div>
-<button id="goLive" class="sec">Passer en mode Live (pendant la soirée)</button>
-<button id="again" class="sec">Refaire une mesure</button></section>
+<button id="exportBtn" class="sec">🖨️ Imprimer / Exporter en PDF</button>
+<button id="goLive" class="sec">🔴 Passer en mode Live (pendant la soirée)</button>
+<button id="again" class="sec">🔁 Refaire une mesure</button></section>
 
 <section id="s4" class="off"><h2>Mode Live</h2>
 <p class="mut">Garde cette page ouverte pendant la soirée. La courbe suit la tendance du son sur plusieurs dizaines de secondes : les variations normales d'un morceau à l'autre ne déclenchent pas d'alerte. Évite de verrouiller l'écran, le micro se coupe sinon.</p>
@@ -143,6 +168,13 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <button id="chatClose" class="sec">Fermer</button>
 </section>
 
+<section id="sChecklist" class="off"><h2>Checklist avant concert</h2>
+<p class="mut">À parcourir avant que le public arrive. Coché automatiquement sauvegardé.</p>
+<div id="checklistItems"></div>
+<button id="checklistReset" class="sec">Réinitialiser</button>
+<button id="checklistClose" class="sec">Fermer</button>
+</section>
+
 <section id="sCGU" class="off"><h2>Conditions générales d'utilisation</h2>
 <p class="mut">Dernière mise à jour : octobre 2026</p>
 <p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
@@ -156,8 +188,9 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <script>
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
+let lastMeasure=null;try{lastMeasure=JSON.parse(localStorage.getItem('cts_lastmeasure')||'null')}catch(e){lastMeasure=null}
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 let mesInterval=null;
 function leaveCurrent(){
 if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
@@ -169,15 +202,18 @@ function saveHistory(rec){const h=loadHistory();h.unshift(rec);if(h.length>20)h.
 function renderHistory(){const h=loadHistory(),box=$('histList');
 if(!h.length){box.innerHTML='<p class="mut">Aucune analyse enregistrée pour l\'instant.</p>';return}
 box.innerHTML=h.map((r,i)=>{const d=new Date(r.ts),date=d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-return `<div class="histCard"><strong>${date}</strong><br><span class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</span><br><button class="sec" data-i="${i}" style="margin-top:8px">Voir le détail</button></div>`}).join('');
-box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>showHistDetail(h[+b.dataset.i]))}
+return `<div class="histCard"><strong>${date}</strong><br><span class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</span>${r.dev?'<canvas class="histMini" data-i="'+i+'" width="280" height="80"></canvas>':''}<br><button class="sec" data-i="${i}" style="margin-top:8px">🔍 Voir le détail</button></div>`}).join('');
+box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>showHistDetail(h[+b.dataset.i]));
+box.querySelectorAll('canvas.histMini').forEach(c=>drawMini(h[+c.dataset.i].dev,c))}
 function showHistDetail(r){const d=new Date(r.ts);
 $('histDetail').innerHTML=`<h3 style="margin-top:0">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</h3>
 <p class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</p>
+${r.dev?'<canvas id="histDetCv" width="560" height="220"></canvas>':''}
 <div>${r.advHtml}</div>
 <details open><summary>Réglages précis (filtres)</summary><div class="tbl"><table>${r.peqHtml}</table></div></details>
 <button id="histBack" class="sec">Retour à la liste</button>`;
 $('histList').classList.add('off');$('histDetail').classList.remove('off');
+if(r.dev)draw(r.dev,'histDetCv');
 $('histBack').onclick=()=>{$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off')}}
 $('histClear').onclick=()=>{if(confirm('Effacer toutes les analyses enregistrées ?')){localStorage.removeItem('cts_history');renderHistory()}};
 $('histClose').onclick=()=>show('s1');
@@ -190,7 +226,39 @@ $('mHome').onclick=()=>{closeMenu();leaveCurrent();show('sWelcome')};
 $('mNew').onclick=()=>{closeMenu();leaveCurrent();show('s1')};
 $('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');renderHistory();show('sHist')};
 $('mChat').onclick=()=>{closeMenu();leaveCurrent();renderChat();show('sChat')};
+$('mChecklist').onclick=()=>{closeMenu();leaveCurrent();renderChecklist();show('sChecklist')};
 $('mCgu').onclick=()=>{closeMenu();leaveCurrent();show('sCGU')};
+// --- Profils de salle réutilisables ---
+function loadProfiles(){try{return JSON.parse(localStorage.getItem('cts_profiles')||'[]')}catch(e){return[]}}
+function saveProfiles(p){try{localStorage.setItem('cts_profiles',JSON.stringify(p))}catch(e){}}
+function renderProfSel(){const p=loadProfiles();$('profSel').innerHTML='<option value="">— Aucun —</option>'+p.map((x,i)=>`<option value="${i}">${x.name}</option>`).join('')}
+$('profSave').onclick=()=>{const name=prompt('Nom de ce profil (ex. « Salle des fêtes de X »)\u00a0:');if(!name)return;const p=loadProfiles();
+const data={name,salle:$('salle').value,proc:$('proc').value,brand:$('brand').value,model:$('model').value,mic:$('mic').value};
+const ex=p.findIndex(x=>x.name===name);if(ex>-1)p[ex]=data;else p.push(data);saveProfiles(p);renderProfSel();$('profSel').value=String(p.findIndex(x=>x.name===name))};
+$('profLoad').onclick=()=>{const i=$('profSel').value;if(i==='')return;const p=loadProfiles()[+i];if(!p)return;
+$('salle').value=p.salle;$('proc').value=p.proc;$('brand').value=p.brand;$('model').value=p.model;$('mic').value=p.mic;$('mic').dispatchEvent(new Event('change'));upd()};
+$('profDel').onclick=()=>{const i=$('profSel').value;if(i==='')return;if(!confirm('Supprimer ce profil ?'))return;const p=loadProfiles();p.splice(+i,1);saveProfiles(p);renderProfSel()};
+renderProfSel();
+// --- Checklist avant concert ---
+const CHECKLIST=[
+"Vérifier que subs et enceintes sont en phase (même polarité).",
+"Démarrer tous les niveaux au minimum avant d'allumer quoi que ce soit.",
+"Allumer dans l'ordre : sources → table de mixage → processeur → amplis/enceintes. Éteindre dans l'ordre inverse.",
+"Placer les enceintes à hauteur d'oreille du public, orientées vers lui.",
+"Grouper ou éloigner les subs des coins et des murs selon le rendu voulu.",
+"Faire un test au bruit rose avant l'arrivée du public, salle vide si possible.",
+"Vérifier qu'aucun micro n'est trop proche d'une enceinte (risque de larsen).",
+"Garder une marge de sécurité sur le limiteur, ne pas pousser le système à fond.",
+"Avoir sous la main le contact d'un bénévole référent en cas de souci pendant la soirée."];
+function loadChecklist(){try{return JSON.parse(localStorage.getItem('cts_checklist')||'{}')}catch(e){return{}}}
+function saveChecklistState(c){try{localStorage.setItem('cts_checklist',JSON.stringify(c))}catch(e){}}
+function renderChecklist(){const st=loadChecklist();
+$('checklistItems').innerHTML=CHECKLIST.map((t,i)=>`<label style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;${i?'border-top:1px solid var(--ln)':''}"><input type="checkbox" data-i="${i}" ${st[i]?'checked':''} style="width:auto;margin-top:3px">${t}</label>`).join('');
+$('checklistItems').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{const s=loadChecklist();s[cb.dataset.i]=cb.checked;saveChecklistState(s)})}
+$('checklistReset').onclick=()=>{if(confirm('Décocher toute la checklist ?')){saveChecklistState({});renderChecklist()}};
+$('checklistClose').onclick=()=>show('s1');
+// --- Export PDF / impression ---
+$('exportBtn').onclick=()=>window.print();
 // --- Assistant IA ---
 const CHAT_SYS="Tu es l'assistant intégré à CTS (Cales Ta Sono), une appli qui aide des bénévoles d'association à régler une sonorisation sans ingénieur du son. Tu es un expert reconnu en sonorisation : matériel (tables de mixage analogiques et numériques, processeurs d'enceintes type DriveRack/miniDSP/Lake, amplis, enceintes actives et passives, subwoofers, micros filaires et HF), réglages (structure de gain, égalisation, compression, limiteur, crossover, délai, polarité), disposition des enceintes (stack au sol, accroche/fly, line array, couverture et dispersion, placement des subs en cardioïde / end-fire / gradient), acoustique de salle selon le type de lieu, gestion du larsen et du feedback, dépannage courant (ronflette, bruit, pas de son, distorsion, coupures), et sécurité (niveaux SPL, protection auditive, ne pas pousser un système en clipping).\n"+
 "Réponds toujours en français, de façon claire, concrète et actionnable, adaptée à des bénévoles sans formation technique : évite le jargon inutile, et quand un terme technique est nécessaire, explique-le brièvement entre parenthèses. Reste concis (quelques phrases ou une courte liste), va droit à l'essentiel, pas de markdown. Si la question dépend du matériel exact de l'utilisateur et qu'il ne l'a pas précisé, donne d'abord une réponse générale utile puis demande la précision. Rappelle brièvement un risque quand une manipulation en présente un (matériel ou oreilles du public). Pour une installation complexe ou critique, précise que ça reste utile de faire appel à un ingénieur du son, sans le répéter à chaque réponse.";
@@ -198,7 +266,10 @@ function loadChat(){try{return JSON.parse(localStorage.getItem('cts_chat')||'[]'
 function saveChat(h){try{localStorage.setItem('cts_chat',JSON.stringify(h.slice(-60)))}catch(e){}}
 let chatHist=loadChat();
 function renderChat(){$('chatLog').innerHTML=chatHist.length?chatHist.map(m=>`<div class="msg ${m.r}">${m.t.replace(/</g,'&lt;')}</div>`).join(''):'<p class="mut">Pose ta première question ci-dessous.</p>';$('chatLog').scrollTop=$('chatLog').scrollHeight}
-function buildChatPrompt(newMsg){const recent=chatHist.slice(-6);let t=CHAT_SYS+'\n\nConversation :\n';
+function buildChatPrompt(newMsg){const recent=chatHist.slice(-6);let ctxM='';
+if(lastMeasure&&lastMeasure.dev){const data=B.map((f,i)=>f+'Hz:'+(lastMeasure.dev[i]>0?'+':'')+lastMeasure.dev[i].toFixed(1)+'dB').join(', ');
+ctxM='\n\nDernière mesure de l\'utilisateur (lieu : '+lastMeasure.lieu+(lastMeasure.appareil?', matériel : '+lastMeasure.appareil:'')+') — écarts par bande de fréquence (positif = trop fort, négatif = trop faible) : '+data+'. Appuie-toi dessus si la question s\'y rapporte (ex. "pourquoi ce pic ?", "comment corriger ça ?"), sinon ignore ces données.';}
+let t=CHAT_SYS+ctxM+'\n\nConversation :\n';
 recent.forEach(m=>{t+=(m.r==='u'?'Utilisateur : ':'Assistant : ')+m.t+'\n'});
 t+='Utilisateur : '+newMsg+'\nAssistant :';return t}
 async function sendChat(){const txt=$('chatInput').value.trim();if(!txt)return;
@@ -220,7 +291,7 @@ function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
-function draw(v,id){const c=$(id||'cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+function draw(v,id,cmp){const c=$(id||'cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
 const bw=W/B.length,mid=H/2,k=H/28;
 const zone=(lo,hi,col)=>{g.fillStyle=col;g.fillRect(0,mid-hi*k,W,(hi-lo)*k);g.fillRect(0,mid+lo*k,W,(hi-lo)*k)};
 zone(0,3,'rgba(122,155,110,.16)');zone(3,6,'rgba(242,169,0,.13)');zone(6,14,'rgba(184,92,78,.13)');
@@ -232,7 +303,16 @@ for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]
 g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);const last=pts[pts.length-1];g.lineTo(last[0],mid);g.closePath();g.fillStyle=grad;g.fill();
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(last[0],last[1]);
 g.lineWidth=2.5;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke();
+if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
+g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=0;i<cpts.length-1;i++){const mx=(cpts[i][0]+cpts[i+1][0])/2,my=(cpts[i][1]+cpts[i+1][1])/2;g.quadraticCurveTo(cpts[i][0],cpts[i][1],mx,my)}g.lineTo(cpts[cpts.length-1][0],cpts[cpts.length-1][1]);
+g.setLineDash([6,4]);g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--fg');g.stroke();g.setLineDash([])}
 g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
+function drawMini(v,c){const g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+const bw=W/v.length,mid=H/2,k=H/28;
+g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
+g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);
+g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke()}
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
 $('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;ctx.createMediaStreamSource(stream).connect(an);
@@ -299,7 +379,7 @@ box.innerHTML='<span class="lbl">Résumé</span><p>'+txt.replace(/</g,'&lt;')+'<
 function loadBias(){try{return JSON.parse(localStorage.getItem('cts_bias')||'{}')}catch(e){return{}}}
 function saveBias(b){try{localStorage.setItem('cts_bias',JSON.stringify(b))}catch(e){}}
 let lastCtx=null;
-function result(d){show('s3');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
+function result(d){show('s3');draw(d,'cvRes');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
 const bias=loadBias(),lieuKey=$('salle').value,bAdj=(bias[lieuKey]&&bias[lieuKey].thrAdj)||0;
 const thr=V('thr',3)+bAdj,mc=V('mcut',6),qq=V('qv',0);
 $('bands').innerHTML='<tr><th>Fréq.</th><th>Écart</th></tr>'+d.map((x,i)=>`<tr><td>${B[i]} Hz</td><td>${x>0?'+':''}${x.toFixed(1)} dB</td></tr>`).join('');
@@ -313,8 +393,14 @@ else{h+=ti('Filtres paramétriques (type cloche)')+'<tr><th>N°</th><th>Fréq.</
 if(pr&&pr.geq&&c.length)h+=ti('Ou égaliseur graphique 31 bandes')+[...c].sort((p,q)=>p.f-q.f).map(f=>row([f.f+' Hz',Math.round(f.g)+' dB'])).join('')}
 h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h;
 lastCtx={lieuKey,thrUsed:thr};
-saveHistory({ts:Date.now(),lieu:$('salle').selectedOptions[0].textContent,appareil:($('brand').value+' '+$('model').value).trim(),advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML});
+const lieuTxt=$('salle').selectedOptions[0].textContent,appTxt=($('brand').value+' '+$('model').value).trim();
+saveHistory({ts:Date.now(),lieu:lieuTxt,appareil:appTxt,advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML,dev:d.slice()});
+lastMeasure={lieu:lieuTxt,appareil:appTxt,dev:d.slice()};try{localStorage.setItem('cts_lastmeasure',JSON.stringify(lastMeasure))}catch(e){}
+renderCmpSel();
 renderFeedback()}
+function renderCmpSel(){const h=loadHistory(),sel=$('cmpSel');
+sel.innerHTML='<option value="">— Aucune —</option>'+h.slice(1).map((r,i)=>{if(!r.dev)return'';const d2=new Date(r.ts);return `<option value="${i+1}">${d2.toLocaleDateString('fr-FR')} ${d2.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} — ${r.lieu}</option>`}).join('')}
+$('cmpSel').onchange=()=>{const i=$('cmpSel').value,h=loadHistory();if(i===''||!h[+i]||!h[+i].dev){draw(dev,'cvRes');return}draw(dev,'cvRes',h[+i].dev)};
 function renderFeedback(){$('fb').innerHTML='<p><strong>Ce résultat te convient ?</strong></p><div class="row"><button id="fbUp">👍 Oui</button><button id="fbDown" class="sec">👎 Pas vraiment</button></div>';
 $('fbUp').onclick=()=>sendFeedback(true);$('fbDown').onclick=()=>{$('fb').innerHTML+='<textarea id="fbTxt" placeholder="Qu\'est-ce qui ne va pas ? (facultatif)"></textarea><button id="fbSend">Envoyer</button>';$('fbSend').onclick=()=>sendFeedback(false,$('fbTxt').value)}}
 function sendFeedback(ok,comment){if(!lastCtx)return;const bias=loadBias(),k=lastCtx.lieuKey;bias[k]=bias[k]||{thrAdj:0};
@@ -368,4 +454,6 @@ $('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('s1')};
 (function boot(){
 if(localStorage.getItem('cts_seenintro')){show('s1')}else{show('sWelcome')}
 })();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 </script></body></html>
