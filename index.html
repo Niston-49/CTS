@@ -55,6 +55,7 @@ body *{visibility:hidden}
 #cmpWrap,#fb,#exportBtn,#goLive,#again,.badge{display:none!important}
 }
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative}
+header>div:first-child{flex:1;min-width:0}
 .menuWrap{position:relative;flex:none}
 .iconBtn{width:auto;margin:0;padding:10px 14px;font-size:20px;line-height:1;background:transparent;border:2px solid var(--ln);border-radius:8px;color:var(--fg)}
 .dropdown{position:absolute;right:0;top:calc(100% + 8px);background:var(--pn);border:1px solid var(--ln);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.45);min-width:210px;z-index:40;overflow:hidden}
@@ -71,10 +72,52 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 .msg.u{background:var(--ac);color:#f3ead9;margin-left:auto}
 .msg.a{background:var(--bg);border:1px solid var(--ln)}
 #chatInput{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);resize:vertical;margin-top:10px}
+.modeGrid{display:flex;flex-direction:column}
+@media (hover:hover) and (pointer:fine){
+button:not(:disabled):hover{filter:brightness(1.12)}
+button.sec:not(:disabled):hover{background:rgba(255,255,255,.04);border-color:var(--mut)}
+.dropdown button:hover{background:rgba(255,255,255,.06)}
+.histCard button:hover,#histBack:hover{filter:none;background:rgba(255,255,255,.05)}
+}
+/* --- Tablette (iPad portrait/paysage) : plus d'air, toujours en une colonne --- */
+@media (min-width:720px){
+body{max-width:680px;padding:28px 24px}
+.modeGrid{flex-direction:row;gap:16px}
+.modeGrid .pl{flex:1;margin:0}
+section{padding:22px 26px}
+}
+/* --- Bureau : coquille avec navigation latérale fixe --- */
+@media (min-width:1024px){
+:root{padding-top:0;padding-bottom:0}
+body{max-width:none;padding:0;font-size:16px}
+.appShell{max-width:1140px;margin:0 auto;padding:48px 32px;display:grid;grid-template-columns:252px minmax(0,1fr);gap:64px;align-items:start}
+.sidebar{position:sticky;top:48px;padding-bottom:12px}
+.main{max-width:720px}
+.main>section:first-of-type{margin-top:0}
+header{display:block}
+.menuWrap{position:static;margin-top:28px}
+#menuBtn{display:none}
+.dropdown{position:static;display:block!important;background:transparent;border:0;box-shadow:none;min-width:0;padding:0}
+.dropdown button{border-radius:8px;padding:11px 14px;font-size:15px}
+.dropdown button+button{border-top:0;margin-top:2px}
+.seg{margin-top:20px}
+section{padding:28px 32px;border-radius:14px}
+h1{font-size:26px}
+.modeGrid{gap:20px}
+canvas{height:280px}
+.histMini{height:90px}
+}
+@media (min-width:1280px){
+.appShell{max-width:1240px;gap:80px}
+.main{max-width:760px}
+}
 </style></head><body>
+<div class="appShell">
+<div class="sidebar">
 <header>
 <div><h1>CTS</h1>
-<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p></div>
+<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p>
+<p class="mut tagline">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p></div>
 <div class="menuWrap">
 <button id="menuBtn" class="iconBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">☰</button>
 <div id="menuDrop" class="dropdown off" role="menu">
@@ -87,14 +130,17 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 </div>
 </div>
 </header>
-<p class="mut">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p>
 <div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button></div>
+</div>
+<div class="main">
 
 <section id="sWelcome"><h2>Bienvenue</h2>
 <p>CTS t'aide à régler ta sono sans ingénieur du son, avec trois façons de t'en servir :</p>
+<div class="modeGrid">
 <div class="pl"><h3>Basique</h3><p>Mesure guidée et conseils en français simple, pour s'y retrouver rapidement.</p></div>
 <div class="pl"><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur.</p></div>
 <div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec des alertes douces en cas de dérive du son.</p></div>
+</div>
 <button id="wOk">Continuer</button></section>
 
 <section id="s1" class="off"><h2>Étape 1/3 — Ton installation</h2>
@@ -186,6 +232,9 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <p>CTS est un projet personnel en développement, fourni « en l'état », sans garantie. Il peut évoluer ou être interrompu à tout moment.</p>
 <button id="cguBack" class="sec">Retour</button>
 </section>
+
+</div>
+</div>
 
 <script>
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
@@ -297,7 +346,10 @@ function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
-function draw(v,id,cmp){const c=$(id||'cv'),g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
+if(c.width!==w||c.height!==h){c.width=w;c.height=h}
+const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
+function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
 const bw=W/B.length,mid=H/2,k=H/28;
 const zone=(lo,hi,col)=>{g.fillStyle=col;g.fillRect(0,mid-hi*k,W,(hi-lo)*k);g.fillRect(0,mid+lo*k,W,(hi-lo)*k)};
 zone(0,3,'rgba(122,155,110,.16)');zone(3,6,'rgba(242,169,0,.13)');zone(6,14,'rgba(184,92,78,.13)');
@@ -313,7 +365,7 @@ if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]
 g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=0;i<cpts.length-1;i++){const mx=(cpts[i][0]+cpts[i+1][0])/2,my=(cpts[i][1]+cpts[i+1][1])/2;g.quadraticCurveTo(cpts[i][0],cpts[i][1],mx,my)}g.lineTo(cpts[cpts.length-1][0],cpts[cpts.length-1][1]);
 g.setLineDash([6,4]);g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--fg');g.stroke();g.setLineDash([])}
 g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
-function drawMini(v,c){const g=c.getContext('2d'),W=c.width,H=c.height,cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+function drawMini(v,c){const {g,W,H}=fitCanvas(c),cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
 g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
@@ -475,6 +527,11 @@ $('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('s1')};
 (function boot(){
 if(localStorage.getItem('cts_seenintro')){show('s1')}else{show('sWelcome')}
 })();
+let resizeTO=null;
+window.addEventListener('resize',()=>{clearTimeout(resizeTO);resizeTO=setTimeout(()=>{
+if(!$('s3').classList.contains('off')&&dev){const ci=$('cmpSel').value,h=loadHistory();draw(dev,'cvRes',(ci!==''&&h[+ci]&&h[+ci].dev)?h[+ci].dev:null)}
+if(!$('sHist').classList.contains('off')&&$('histDetail').classList.contains('off'))renderHistory();
+},150)});
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 </script></body></html>
