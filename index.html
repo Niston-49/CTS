@@ -124,6 +124,7 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
 <button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
+<div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
 <button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
 <button id="bmes" disabled><span class="lbl">📊 Analyser</span><span class="prog" id="bmesProg"></span></button>
 <p id="st" class="mut"></p></section>
@@ -180,7 +181,8 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 <p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
 <p>Les mesures et conseils fournis sont approximatifs et dépendent de la qualité du micro, du lieu et des réglages. CTS et son auteur déclinent toute responsabilité en cas de dommage matériel (enceintes, amplis) lié à l'utilisation de l'outil : vérifie toujours tes niveaux avant d'augmenter un réglage.</p>
 <p>L'accès au micro sert uniquement à l'analyse en direct, dans ton navigateur. Aucun enregistrement audio n'est envoyé ni conservé.</p>
-<p>Tes réglages, ton historique d'analyses et tes préférences sont stockés uniquement sur ton appareil (stockage local du navigateur). Rien n'est transmis à un serveur, sauf si tu envoies volontairement un retour (👍/👎 et commentaire), utilisé pour améliorer l'outil.</p>
+<p>Tes réglages, ton historique d'analyses et tes préférences sont stockés uniquement sur ton appareil (stockage local du navigateur).</p>
+<p>À chaque mesure terminée, les écarts par bande de fréquence mesurés (le résultat de l'analyse acoustique), le type de lieu et le matériel renseigné sont envoyés de façon anonyme à un serveur, pour suivre dans le temps la fiabilité des conseils et les améliorer. Ces données ne contiennent ni nom, ni email, ni aucune information permettant de t'identifier. Si tu donnes un retour (👍/👎 et commentaire), il est rattaché à cette mesure, toujours de façon anonyme.</p>
 <p>CTS est un projet personnel en développement, fourni « en l'état », sans garantie. Il peut évoluer ou être interrompu à tout moment.</p>
 <button id="cguBack" class="sec">Retour</button>
 </section>
@@ -189,6 +191,7 @@ header{display:flex;align-items:flex-start;justify-content:space-between;gap:10p
 const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let lastMeasure=null;try{lastMeasure=JSON.parse(localStorage.getItem('cts_lastmeasure')||'null')}catch(e){lastMeasure=null}
+let lastMeasureId=null;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
 const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 let mesInterval=null;
@@ -260,7 +263,10 @@ $('checklistClose').onclick=()=>show('s1');
 // --- Export PDF / impression ---
 $('exportBtn').onclick=()=>window.print();
 // --- Assistant IA ---
-const CHAT_SYS="Tu es l'assistant intégré à CTS (Cales Ta Sono), une appli qui aide des bénévoles d'association à régler une sonorisation sans ingénieur du son. Tu es un expert reconnu en sonorisation : matériel (tables de mixage analogiques et numériques, processeurs d'enceintes type DriveRack/miniDSP/Lake, amplis, enceintes actives et passives, subwoofers, micros filaires et HF), réglages (structure de gain, égalisation, compression, limiteur, crossover, délai, polarité), disposition des enceintes (stack au sol, accroche/fly, line array, couverture et dispersion, placement des subs en cardioïde / end-fire / gradient), acoustique de salle selon le type de lieu, gestion du larsen et du feedback, dépannage courant (ronflette, bruit, pas de son, distorsion, coupures), et sécurité (niveaux SPL, protection auditive, ne pas pousser un système en clipping).\n"+
+const CHAT_SYS="Tu es l'assistant intégré à CTS (Cales Ta Sono), une appli web qui aide des bénévoles d'association à régler une sonorisation sans ingénieur du son. L'utilisateur te parle depuis l'appli elle-même, en plein milieu de son usage : quand il dit « cette appli », « l'appli », « ici » ou équivalent, il parle toujours de CTS, jamais d'une autre application — ne renvoie jamais vers une appli concurrente pour faire ce que CTS fait déjà.\n"+
+"Pour que tu comprennes le contexte dans lequel tu interviens, voici comment CTS fonctionne concrètement : l'utilisateur choisit son lieu et son matériel, puis CTS fait jouer un bruit rose depuis les enceintes et écoute la salle via le microphone du téléphone (grâce au navigateur), pour tracer une courbe RTA par bandes de fréquence et proposer des corrections EQ. Il y a un mode Basique, un mode Expert (paramètres avancés), un mode Live pour surveiller la sono pendant l'événement, un historique des mesures, des profils de salle enregistrables, et une checklist avant concert — tout est accessible depuis le menu ☰ en haut à droite.\n"+
+"Le micro utilisé pour la mesure est donc le micro intégré du téléphone (ou un micro externe si l'utilisateur en branche un et que le téléphone l'utilise comme source audio par défaut) : CTS n'a pas de mode de calibration de micro séparé. Si on te demande un conseil de micro de mesure, tiens compte de ça : le micro intégré d'un smartphone récent suffit pour une utilisation basique avec CTS (la courbe reste relative, pas absolue, donc l'imprécision du micro compte peu) ; pour plus de précision, recommande un micro de mesure externe omnidirectionnel compatible avec un téléphone (ex. Dayton Audio iMM-6 avec adaptateur, ou un micro USB-C/Lightning calibré), en précisant que CTS l'utilisera simplement comme source micro du téléphone, sans configuration spécifique à faire dans l'appli.\n"+
+"Tu es aussi un expert reconnu en sonorisation au sens large : matériel (tables de mixage analogiques et numériques, processeurs d'enceintes type DriveRack/miniDSP/Lake, amplis, enceintes actives et passives, subwoofers, micros filaires et HF), réglages (structure de gain, égalisation, compression, limiteur, crossover, délai, polarité), disposition des enceintes (stack au sol, accroche/fly, line array, couverture et dispersion, placement des subs en cardioïde / end-fire / gradient), acoustique de salle selon le type de lieu, gestion du larsen et du feedback, dépannage courant (ronflette, bruit, pas de son, distorsion, coupures), et sécurité (niveaux SPL, protection auditive, ne pas pousser un système en clipping).\n"+
 "Réponds toujours en français, de façon claire, concrète et actionnable, adaptée à des bénévoles sans formation technique : évite le jargon inutile, et quand un terme technique est nécessaire, explique-le brièvement entre parenthèses. Reste concis (quelques phrases ou une courte liste), va droit à l'essentiel, pas de markdown. Si la question dépend du matériel exact de l'utilisateur et qu'il ne l'a pas précisé, donne d'abord une réponse générale utile puis demande la précision. Rappelle brièvement un risque quand une manipulation en présente un (matériel ou oreilles du public). Pour une installation complexe ou critique, précise que ça reste utile de faire appel à un ingénieur du son, sans le répéter à chaque réponse.";
 function loadChat(){try{return JSON.parse(localStorage.getItem('cts_chat')||'[]')}catch(e){return[]}}
 function saveChat(h){try{localStorage.setItem('cts_chat',JSON.stringify(h.slice(-60)))}catch(e){}}
@@ -316,8 +322,17 @@ g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.str
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
 $('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;ctx.createMediaStreamSource(stream).connect(an);
-$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop()}
+$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop();
+setupOutputPicker()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
+async function setupOutputPicker(){
+if(!(ctx&&'setSinkId' in ctx))return;
+try{const devs=await navigator.mediaDevices.enumerateDevices();const outs=devs.filter(d=>d.kind==='audiooutput');
+if(outs.length<2)return;
+$('outSel').innerHTML=outs.map(d=>`<option value="${d.deviceId}">${d.label||'Sortie audio'}</option>`).join('');
+$('outWrap').style.display='block';
+$('outSel').onchange=()=>{ctx.setSinkId($('outSel').value).catch(()=>{})}
+}catch(e){}}
 $('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose';return}
 const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
 for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
@@ -397,7 +412,13 @@ const lieuTxt=$('salle').selectedOptions[0].textContent,appTxt=($('brand').value
 saveHistory({ts:Date.now(),lieu:lieuTxt,appareil:appTxt,advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML,dev:d.slice()});
 lastMeasure={lieu:lieuTxt,appareil:appTxt,dev:d.slice()};try{localStorage.setItem('cts_lastmeasure',JSON.stringify(lastMeasure))}catch(e){}
 renderCmpSel();
+sendMeasureData(lieuTxt,appTxt,d);
 renderFeedback()}
+function sendMeasureData(lieu,appareil,d){lastMeasureId=null;
+if(AI_WORKER_URL.includes('VOTRE-WORKER'))return;
+const mode=document.body.classList.contains('expert')?'Expert':'Basique';
+fetch(AI_WORKER_URL.replace(/\/$/,'')+'/measure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lieu,appareil,mode,bands:d})})
+.then(r=>r.json()).then(j=>{if(j&&j.id)lastMeasureId=j.id}).catch(()=>{})}
 function renderCmpSel(){const h=loadHistory(),sel=$('cmpSel');
 sel.innerHTML='<option value="">— Aucune —</option>'+h.slice(1).map((r,i)=>{if(!r.dev)return'';const d2=new Date(r.ts);return `<option value="${i+1}">${d2.toLocaleDateString('fr-FR')} ${d2.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} — ${r.lieu}</option>`}).join('')}
 $('cmpSel').onchange=()=>{const i=$('cmpSel').value,h=loadHistory();if(i===''||!h[+i]||!h[+i].dev){draw(dev,'cvRes');return}draw(dev,'cvRes',h[+i].dev)};
@@ -406,7 +427,7 @@ $('fbUp').onclick=()=>sendFeedback(true);$('fbDown').onclick=()=>{$('fb').innerH
 function sendFeedback(ok,comment){if(!lastCtx)return;const bias=loadBias(),k=lastCtx.lieuKey;bias[k]=bias[k]||{thrAdj:0};
 if(!ok)bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj+0.5));else bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj-0.15));
 saveBias(bias);
-if(!AI_WORKER_URL.includes('VOTRE-WORKER')){fetch(AI_WORKER_URL.replace(/\/$/,'')+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lieu:k,satisfied:ok,comment:comment||'',ts:Date.now()})}).catch(()=>{})}
+if(!AI_WORKER_URL.includes('VOTRE-WORKER')){fetch(AI_WORKER_URL.replace(/\/$/,'')+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lastMeasureId,lieu:k,satisfied:ok,comment:comment||'',ts:Date.now()})}).catch(()=>{})}
 $('fb').innerHTML='<p class="thx">Merci, c\'est pris en compte pour les prochaines mesures.</p>'}
 $('again').onclick=()=>show('s2');
 const setM=e=>{document.body.classList.toggle('expert',e);$('mE').classList.toggle('on',e);$('mB').classList.toggle('on',!e);$('mE').setAttribute('aria-pressed',e);$('mB').setAttribute('aria-pressed',!e)};
