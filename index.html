@@ -361,23 +361,19 @@ g.strokeStyle='rgba(205,205,205,.3)';g.lineWidth=1;g.setLineDash([4,4]);
 g.setLineDash([]);
 g.strokeStyle='rgba(225,225,225,.5)';g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(255,255,255,.12)');grad.addColorStop(.5,'rgba(255,255,255,.02)');grad.addColorStop(1,'rgba(255,255,255,.12)');
-g.beginPath();g.moveTo(pts[0][0],mid);g.lineTo(pts[0][0],pts[0][1]);
-for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
-g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);const last=pts[pts.length-1];g.lineTo(last[0],mid);g.closePath();g.fillStyle=grad;g.fill();
-g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(last[0],last[1]);
-g.lineWidth=2.5;g.strokeStyle='#ffffff';g.lineJoin='round';g.stroke();
+g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
+g.lineWidth=1.1;g.strokeStyle='#ffffff';g.lineJoin='miter';g.lineCap='butt';g.stroke();
 if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=0;i<cpts.length-1;i++){const mx=(cpts[i][0]+cpts[i+1][0])/2,my=(cpts[i][1]+cpts[i+1][1])/2;g.quadraticCurveTo(cpts[i][0],cpts[i][1],mx,my)}g.lineTo(cpts[cpts.length-1][0],cpts[cpts.length-1][1]);
-g.setLineDash([6,4]);g.lineWidth=2;g.strokeStyle='#2f86c7';g.stroke();g.setLineDash([])}
+g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=1;i<cpts.length;i++)g.lineTo(cpts[i][0],cpts[i][1]);
+g.setLineDash([6,4]);g.lineWidth=1.1;g.strokeStyle='#2f86c7';g.stroke();g.setLineDash([])}
 g.fillStyle='rgba(220,220,220,.65)';g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
 function drawMini(v,c){const {g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
 g.fillStyle='#000';g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
 g.strokeStyle='rgba(225,225,225,.35)';g.lineWidth=1;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);
-g.lineWidth=2;g.strokeStyle='#ffffff';g.lineJoin='round';g.stroke()}
+g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
+g.lineWidth=1;g.strokeStyle='#ffffff';g.lineJoin='miter';g.stroke()}
 let liveEmaDisp=null;
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
 const r=rel(l);if(!liveEmaDisp||liveEmaDisp.length!==r.length)liveEmaDisp=r.slice();else r.forEach((v,i)=>liveEmaDisp[i]=liveEmaDisp[i]*.82+v*.18);
