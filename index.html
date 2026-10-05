@@ -156,8 +156,10 @@ canvas{height:280px}
 <input type="text" id="brand" placeholder="Marque, ex. Behringer" autocomplete="off"><input type="text" id="model" placeholder="Modèle, ex. XR18" autocomplete="off" style="margin-top:8px">
 <p id="pf" class="mut" style="margin:6px 0 0"></p>
 <label for="mic">Micro de mesure</label>
-<select id="mic"><option value="tel">Micro du téléphone (indicatif)</option><option value="ext">Micro externe (avec fichier de calibration)</option></select>
-<div id="calbox" style="display:none"><label for="calf">Fichier de calibration (.txt : fréquence gain)</label><input type="file" id="calf" accept=".txt,.cal,.csv"></div>
+<select id="mic"><option value="">Micro du téléphone / de l'ordinateur (par défaut)</option></select>
+<p class="mut" id="micNote" style="margin-top:4px"></p>
+<label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-weight:600"><input type="checkbox" id="micCalToggle" style="width:auto;margin:0">J'ai un fichier de calibration pour ce micro</label>
+<div id="calbox" style="display:none;margin-top:8px"><label for="calf">Fichier de calibration (.txt : fréquence gain)</label><input type="file" id="calf" accept=".txt,.cal,.csv"></div>
 <div class="exp"><label for="dur">Durée de moyenne (s)</label><input type="number" id="dur" value="8" min="3" max="60">
 <label for="slope">Pente cible au-dessus de 4 kHz (dB/octave)</label><input type="number" id="slope" value="-1.5" step="0.5">
 <label for="thr">Seuil de correction (dB)</label><input type="number" id="thr" value="3" step="0.5">
@@ -170,7 +172,6 @@ canvas{height:280px}
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
 <button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
-<div id="inWrap" style="display:none"><label for="inSel">Microphone utilisé</label><select id="inSel"></select></div>
 <div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
 <button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
 <button id="bmes" disabled><span class="lbl">📊 Analyser</span><span class="prog" id="bmesProg"></span></button>
@@ -276,7 +277,7 @@ function closeMenu(){menuDrop.classList.add('off');menuBtn.setAttribute('aria-ex
 menuBtn.onclick=e=>{e.stopPropagation();const willOpen=menuDrop.classList.contains('off');menuDrop.classList.toggle('off');menuBtn.setAttribute('aria-expanded',String(willOpen))};
 document.addEventListener('click',e=>{if(!menuDrop.contains(e.target)&&e.target!==menuBtn)closeMenu()});
 $('mHome').onclick=()=>{closeMenu();leaveCurrent();show('sWelcome')};
-$('mNew').onclick=()=>{closeMenu();leaveCurrent();show('s1')};
+$('mNew').onclick=()=>{closeMenu();leaveCurrent();refreshMicList();show('s1')};
 $('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');renderHistory();show('sHist')};
 $('mChat').onclick=()=>{closeMenu();leaveCurrent();renderChat();show('sChat')};
 $('mChecklist').onclick=()=>{closeMenu();leaveCurrent();renderChecklist();show('sChecklist')};
@@ -286,10 +287,12 @@ function loadProfiles(){try{return JSON.parse(localStorage.getItem('cts_profiles
 function saveProfiles(p){try{localStorage.setItem('cts_profiles',JSON.stringify(p))}catch(e){}}
 function renderProfSel(){const p=loadProfiles();$('profSel').innerHTML='<option value="">— Aucun —</option>'+p.map((x,i)=>`<option value="${i}">${x.name}</option>`).join('')}
 $('profSave').onclick=()=>{const name=prompt('Nom de ce profil (ex. « Salle des fêtes de X »)\u00a0:');if(!name)return;const p=loadProfiles();
-const data={name,salle:$('salle').value,proc:$('proc').value,brand:$('brand').value,model:$('model').value,mic:$('mic').value};
+const data={name,salle:$('salle').value,proc:$('proc').value,brand:$('brand').value,model:$('model').value,mic:$('mic').value,calOn:$('micCalToggle').checked};
 const ex=p.findIndex(x=>x.name===name);if(ex>-1)p[ex]=data;else p.push(data);saveProfiles(p);renderProfSel();$('profSel').value=String(p.findIndex(x=>x.name===name))};
 $('profLoad').onclick=()=>{const i=$('profSel').value;if(i==='')return;const p=loadProfiles()[+i];if(!p)return;
-$('salle').value=p.salle;$('proc').value=p.proc;$('brand').value=p.brand;$('model').value=p.model;$('mic').value=p.mic;$('mic').dispatchEvent(new Event('change'));upd()};
+$('salle').value=p.salle;$('proc').value=p.proc;$('brand').value=p.brand;$('model').value=p.model;
+if(p.mic&&[...$('mic').options].some(o=>o.value===p.mic)){$('mic').value=p.mic;selectedMicId=p.mic}
+$('micCalToggle').checked=!!p.calOn;$('calbox').style.display=p.calOn?'block':'none';upd()};
 $('profDel').onclick=()=>{const i=$('profSel').value;if(i==='')return;if(!confirm('Supprimer ce profil ?'))return;const p=loadProfiles();p.splice(+i,1);saveProfiles(p);renderProfSel()};
 renderProfSel();
 // --- Checklist avant concert ---
@@ -338,7 +341,7 @@ $('chatSend').onclick=sendChat;
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
 $('chatClear').onclick=()=>{if(confirm('Effacer toute la conversation ?')){chatHist=[];saveChat(chatHist);renderChat()}};
 $('chatClose').onclick=()=>show('s1');
-$('mic').onchange=e=>$('calbox').style.display=e.target.value==='ext'?'block':'none';
+$('micCalToggle').onchange=e=>$('calbox').style.display=e.target.checked?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
 function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(Math.log(p[0]/f))<Math.abs(Math.log(b[0]/f)))b=p;return b[1]}
 $('go1').onclick=()=>show('s2');
@@ -350,47 +353,57 @@ function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>
 function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
 if(c.width!==w||c.height!==h){c.width=w;c.height=h}
 const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
-function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
+g.fillStyle='#000';g.fillRect(0,0,W,H);
 const bw=W/B.length,mid=H/2,k=H/28;
-const zone=(lo,hi,col)=>{g.fillStyle=col;g.fillRect(0,mid-hi*k,W,(hi-lo)*k);g.fillRect(0,mid+lo*k,W,(hi-lo)*k)};
-zone(0,3,'rgba(122,155,110,.16)');zone(3,6,'rgba(242,169,0,.13)');zone(6,14,'rgba(184,92,78,.13)');
-g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+g.strokeStyle='rgba(205,205,205,.3)';g.lineWidth=1;g.setLineDash([4,4]);
+[3,6].forEach(dBv=>{g.beginPath();g.moveTo(0,mid-dBv*k);g.lineTo(W,mid-dBv*k);g.stroke();g.beginPath();g.moveTo(0,mid+dBv*k);g.lineTo(W,mid+dBv*k);g.stroke()});
+g.setLineDash([]);
+g.strokeStyle='rgba(225,225,225,.5)';g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(47,134,199,.35)');grad.addColorStop(.5,'rgba(47,134,199,.05)');grad.addColorStop(1,'rgba(47,134,199,.35)');
+const grad=g.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(255,255,255,.12)');grad.addColorStop(.5,'rgba(255,255,255,.02)');grad.addColorStop(1,'rgba(255,255,255,.12)');
 g.beginPath();g.moveTo(pts[0][0],mid);g.lineTo(pts[0][0],pts[0][1]);
 for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
 g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);const last=pts[pts.length-1];g.lineTo(last[0],mid);g.closePath();g.fillStyle=grad;g.fill();
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(last[0],last[1]);
-g.lineWidth=2.5;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke();
+g.lineWidth=2.5;g.strokeStyle='#ffffff';g.lineJoin='round';g.stroke();
 if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=0;i<cpts.length-1;i++){const mx=(cpts[i][0]+cpts[i+1][0])/2,my=(cpts[i][1]+cpts[i+1][1])/2;g.quadraticCurveTo(cpts[i][0],cpts[i][1],mx,my)}g.lineTo(cpts[cpts.length-1][0],cpts[cpts.length-1][1]);
-g.setLineDash([6,4]);g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--fg');g.stroke();g.setLineDash([])}
-g.fillStyle=cs.getPropertyValue('--mut');g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
-function drawMini(v,c){const {g,W,H}=fitCanvas(c),cs=getComputedStyle(document.body);g.clearRect(0,0,W,H);
+g.setLineDash([6,4]);g.lineWidth=2;g.strokeStyle='#2f86c7';g.stroke();g.setLineDash([])}
+g.fillStyle='rgba(220,220,220,.65)';g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
+function drawMini(v,c){const {g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
+g.fillStyle='#000';g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
-g.strokeStyle=cs.getPropertyValue('--ln');g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+g.strokeStyle='rgba(225,225,225,.35)';g.lineWidth=1;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;g.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}g.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);
-g.lineWidth=2;g.strokeStyle=cs.getPropertyValue('--ac');g.lineJoin='round';g.stroke()}
-function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}draw(rel(l));requestAnimationFrame(loop)}
-$('bmic').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+g.lineWidth=2;g.strokeStyle='#ffffff';g.lineJoin='round';g.stroke()}
+let liveEmaDisp=null;
+function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
+const r=rel(l);if(!liveEmaDisp||liveEmaDisp.length!==r.length)liveEmaDisp=r.slice();else r.forEach((v,i)=>liveEmaDisp[i]=liveEmaDisp[i]*.82+v*.18);
+draw(liveEmaDisp);requestAnimationFrame(loop)}
+let selectedMicId='';
+async function refreshMicList(){const sel=$('mic');
+try{let devs=await navigator.mediaDevices.enumerateDevices();let ins=devs.filter(d=>d.kind==='audioinput');
+if(ins.length&&ins.every(d=>!d.label)){
+try{const tmp=await navigator.mediaDevices.getUserMedia({audio:true});tmp.getTracks().forEach(t=>t.stop());
+devs=await navigator.mediaDevices.enumerateDevices();ins=devs.filter(d=>d.kind==='audioinput')}catch(e){}}
+if(!ins.length){sel.innerHTML='<option value="">Micro du téléphone / de l\'ordinateur (par défaut)</option>';$('micNote').textContent='';return}
+const prev=selectedMicId;
+sel.innerHTML=ins.map(d=>`<option value="${d.deviceId}">${d.label||'Microphone'}</option>`).join('');
+if(prev&&ins.some(d=>d.deviceId===prev))sel.value=prev;selectedMicId=sel.value;
+$('micNote').textContent=ins.length>1?'Plusieurs micros détectés (interne, Bluetooth, USB…) : choisis celui que tu utilises.':'';
+}catch(e){sel.innerHTML='<option value="">Micro du téléphone / de l\'ordinateur (par défaut)</option>';$('micNote').textContent="Autorise l'accès au micro pour voir la liste si tu as un micro externe branché.";}}
+$('mic').onchange=()=>{selectedMicId=$('mic').value};
+$('bmic').onclick=async()=>{try{
+const constraints={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
+if(selectedMicId)constraints.deviceId={exact:selectedMicId};
+stream=await navigator.mediaDevices.getUserMedia({audio:constraints});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;src=ctx.createMediaStreamSource(stream);src.connect(an);
-$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Barres vertes : bon. Orange ou rouge : écart avec une réponse équilibrée.';loop();
-setupInputPicker();setupOutputPicker()}
+liveEmaDisp=null;
+$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Courbe blanche : réponse mesurée. Pointillés gris : zones de tolérance.';loop();
+setupOutputPicker()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
-async function setupInputPicker(){
-try{const devs=await navigator.mediaDevices.enumerateDevices();const ins=devs.filter(d=>d.kind==='audioinput');
-if(ins.length<2)return;
-$('inSel').innerHTML=ins.map(d=>`<option value="${d.deviceId}">${d.label||'Microphone'}</option>`).join('');
-const current=stream.getAudioTracks()[0];if(current&&current.getSettings&&current.getSettings().deviceId)$('inSel').value=current.getSettings().deviceId;
-$('inWrap').style.display='block';
-$('inSel').onchange=async()=>{const id=$('inSel').value;try{
-const newStream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:id},echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-if(src)src.disconnect();if(stream)stream.getTracks().forEach(t=>t.stop());
-stream=newStream;src=ctx.createMediaStreamSource(stream);src.connect(an);
-$('st').textContent='Micro changé : '+( $('inSel').selectedOptions[0]?.textContent||'' );
-}catch(e){$('st').textContent='Impossible de passer sur ce micro.'}}
-}catch(e){}}
 async function setupOutputPicker(){
 if(!(ctx&&'setSinkId' in ctx))return;
 try{const devs=await navigator.mediaDevices.enumerateDevices();const outs=devs.filter(d=>d.kind==='audiooutput');
@@ -535,11 +548,11 @@ document.body.appendChild(m);
 $('liveInfoOk').onclick=()=>{if($('liveInfoSkip').checked)localStorage.setItem('cts_liveinfo','1');m.remove();res()}})}
 
 // --- Accueil (première ouverture) ---
-$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');show('s1')};
+$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');refreshMicList();show('s1')};
 
 // --- Démarrage ---
 (function boot(){
-if(localStorage.getItem('cts_seenintro')){show('s1')}else{show('sWelcome')}
+if(localStorage.getItem('cts_seenintro')){refreshMicList();show('s1')}else{show('sWelcome')}
 })();
 let resizeTO=null;
 window.addEventListener('resize',()=>{clearTimeout(resizeTO);resizeTO=setTimeout(()=>{
