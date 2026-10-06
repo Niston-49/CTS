@@ -239,7 +239,7 @@ canvas{height:280px}
 </div>
 
 <script>
-const B=[50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
+const B=[20,25,31.5,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000,20000];
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let lastMeasure=null;try{lastMeasure=JSON.parse(localStorage.getItem('cts_lastmeasure')||'null')}catch(e){lastMeasure=null}
 let lastMeasureId=null;
@@ -349,7 +349,7 @@ const V=(id,d)=>{const x=parseFloat($(id).value);return document.body.classList.
 function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
-function rel(l){const ref=l.slice(3,20).reduce((a,b)=>a+b,0)/17;return l.map(v=>v-ref)}
+function rel(l){const i0=B.indexOf(100),i1=B.indexOf(4000);const ref=l.slice(i0,i1+1).reduce((a,b)=>a+b,0)/(i1-i0+1);return l.map(v=>v-ref)}
 function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
 if(c.width!==w||c.height!==h){c.width=w;c.height=h}
 const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
@@ -366,7 +366,9 @@ g.lineWidth=1.1;g.strokeStyle='#ffffff';g.lineJoin='miter';g.lineCap='butt';g.st
 if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=1;i<cpts.length;i++)g.lineTo(cpts[i][0],cpts[i][1]);
 g.setLineDash([6,4]);g.lineWidth=1.1;g.strokeStyle='#2f86c7';g.stroke();g.setLineDash([])}
-g.fillStyle='rgba(220,220,220,.65)';g.font='12px sans-serif';[[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4))}
+g.fillStyle='rgba(220,220,220,.65)';g.font='12px sans-serif';g.textAlign='left';
+[[20,'20'],[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4));
+g.textAlign='right';g.fillText('20k',W-2,H-4);g.textAlign='left'}
 function drawMini(v,c){const {g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
 g.fillStyle='#000';g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
@@ -418,7 +420,7 @@ requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.styl
 lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
 dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}result(dev)}},1000)};
 const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
-function advice(d){const a=[],s=$('salle').value,g=avg(d,0,4),h=avg(d,19,26),m=avg(d,5,9);
+function advice(d){const a=[],s=$('salle').value,g=avg(d,B.indexOf(50),B.indexOf(100)),h=avg(d,B.indexOf(4000),B.length),m=avg(d,B.indexOf(160),B.indexOf(315));
 const add=(c,t)=>a.push(`<div class="li"><span class="tag ${c}">${c==='ok'?'OK':'À régler'}</span>${t}</div>`);
 if(g>4)add('bad',`Trop de grave (${g.toFixed(0)} dB en trop sous 100 Hz). Baisse le niveau des subs d'environ ${Math.min(6,Math.round(g))} dB, ou éloigne-les des murs et des coins.`);
 else if(g<-4)add('bad',`Il manque du grave (${Math.abs(g).toFixed(0)} dB). Monte les subs de ${Math.min(6,Math.round(-g))} dB, rapproche-les d'un mur, et vérifie la polarité sub et tops.`);
