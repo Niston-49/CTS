@@ -6,12 +6,18 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#0b0a08">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('cts_theme')||'dark'}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CTS">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0a08;--fg:#e8dcc5;--mut:#a69878;--pn:#161410;--ac:#2f86c7;--ok:#7a9b6e;--bad:#b85c4e;--ln:#332e24;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#0b0a08;--fg:#e8dcc5;--mut:#a69878;--pn:#161410;--ac:#2f86c7;--ok:#7a9b6e;--bad:#b85c4e;--ln:#332e24;
+--chart-bg:#000000;--chart-line:#ffffff;--chart-grid:rgba(205,205,205,.3);--chart-ref:rgba(225,225,225,.5);--chart-label:rgba(220,220,220,.65);--chart-cmp:#2f86c7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html[data-theme="light"] canvas{border:1px solid var(--ln)}
+html[data-theme="light"]{--bg:#f7f3ea;--fg:#2a2415;--mut:#746a52;--pn:#ffffff;--ac:#2f86c7;--ok:#4f6b45;--bad:#a23b2b;--ln:#e3dac4;
+--chart-bg:#ffffff;--chart-line:#1c1a14;--chart-grid:rgba(60,55,40,.28);--chart-ref:rgba(40,36,24,.45);--chart-label:rgba(50,46,32,.68);--chart-cmp:#1f5f8f}
 *{box-sizing:border-box}html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font:500 17px/1.45 'Barlow Semi Condensed',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:16px}
 h1{font-size:30px;margin:0 0 4px;letter-spacing:.5px}h2{font-size:22px;margin:0 0 8px}
@@ -126,6 +132,7 @@ canvas{height:280px}
 <button id="mHist" role="menuitem">📜 Analyses passées</button>
 <button id="mChat" role="menuitem">🤖 Assistant IA</button>
 <button id="mChecklist" role="menuitem">✅ Checklist avant concert</button>
+<button id="mSettings" role="menuitem">⚙️ Réglages</button>
 <button id="mCgu" role="menuitem">📄 CGU</button>
 </div>
 </div>
@@ -171,6 +178,11 @@ canvas{height:280px}
 <section id="s2" class="off"><h2>Étape 2/3 — Mesure</h2>
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
 <canvas id="cv" width="560" height="220"></canvas>
+<p id="clipWarn" style="display:none;color:var(--bad);font-weight:600;margin:8px 0 0">⚠️ Signal saturé : baisse le volume de la sono ou éloigne le micro.</p>
+<div class="exp" id="multiBox" style="margin-top:14px">
+<label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="multiToggle" style="width:auto;margin:0">Mesure multi-points (moyenne de plusieurs positions, jusqu'à 5)</label>
+<p class="mut" id="multiStatus" style="display:none;margin:6px 0 0"></p>
+</div>
 <button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
 <div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
 <button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
@@ -178,6 +190,7 @@ canvas{height:280px}
 <p id="st" class="mut"></p></section>
 
 <section id="s3" class="off"><h2>Étape 3/3 — Résultat</h2>
+<div id="clipResWarn" style="display:none;background:rgba(184,92,78,.15);border:1px solid var(--bad);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-weight:600;color:var(--bad)">⚠️ Saturation détectée pendant la mesure : le résultat peut être faussé. Baisse le volume et refais la mesure si possible.</div>
 <div id="ai" style="display:none"></div>
 <canvas id="cvRes" width="560" height="220"></canvas>
 <div id="cmpWrap"><label for="cmpSel">Comparer à une analyse précédente</label>
@@ -224,6 +237,13 @@ canvas{height:280px}
 <button id="checklistClose" class="sec">Fermer</button>
 </section>
 
+<section id="sSettings" class="off"><h2>Réglages</h2>
+<label>Apparence</label>
+<div class="seg" role="group" aria-label="Thème"><button id="themeDark" class="on" aria-pressed="true">🌙 Sombre</button><button id="themeLight" aria-pressed="false">☀️ Clair</button></div>
+<p class="mut">Le mode clair est plus lisible en plein jour, en extérieur.</p>
+<button id="settingsClose" class="sec">Fermer</button>
+</section>
+
 <section id="sCGU" class="off"><h2>Conditions générales d'utilisation</h2>
 <p class="mut">Dernière mise à jour : octobre 2026</p>
 <p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
@@ -243,8 +263,9 @@ const B=[20,25,31.5,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,125
 let ctx,an,src,stream,noise,cal=null,acc=null,n=0,mesuring=false,dev=null,wakeLock=null;
 let lastMeasure=null;try{lastMeasure=JSON.parse(localStorage.getItem('cts_lastmeasure')||'null')}catch(e){lastMeasure=null}
 let lastMeasureId=null;
+let CC=null,multiPoints=[],clipDuringMes=false,clipFrame=0;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sSettings','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
 let mesInterval=null;
 function leaveCurrent(){
 if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
@@ -282,6 +303,18 @@ $('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add
 $('mChat').onclick=()=>{closeMenu();leaveCurrent();renderChat();show('sChat')};
 $('mChecklist').onclick=()=>{closeMenu();leaveCurrent();renderChecklist();show('sChecklist')};
 $('mCgu').onclick=()=>{closeMenu();leaveCurrent();show('sCGU')};
+// --- Réglages : thème sombre / clair ---
+function applyTheme(t){document.documentElement.dataset.theme=t;CC=null;
+$('themeDark').classList.toggle('on',t==='dark');$('themeDark').setAttribute('aria-pressed',String(t==='dark'));
+$('themeLight').classList.toggle('on',t==='light');$('themeLight').setAttribute('aria-pressed',String(t==='light'));
+const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=getComputedStyle(document.body).getPropertyValue('--bg').trim()||'#0b0a08';
+try{localStorage.setItem('cts_theme',t)}catch(e){}
+if(!$('s3').classList.contains('off')&&dev){const ci=$('cmpSel').value,h=loadHistory();draw(dev,'cvRes',(ci!==''&&h[+ci]&&h[+ci].dev)?h[+ci].dev:null)}}
+$('themeDark').onclick=()=>applyTheme('dark');
+$('themeLight').onclick=()=>applyTheme('light');
+$('mSettings').onclick=()=>{closeMenu();leaveCurrent();show('sSettings')};
+$('settingsClose').onclick=()=>show('s1');
+applyTheme(localStorage.getItem('cts_theme')==='light'?'light':'dark');
 // --- Profils de salle réutilisables ---
 function loadProfiles(){try{return JSON.parse(localStorage.getItem('cts_profiles')||'[]')}catch(e){return[]}}
 function saveProfiles(p){try{localStorage.setItem('cts_profiles',JSON.stringify(p))}catch(e){}}
@@ -353,31 +386,40 @@ function rel(l){const i0=B.indexOf(100),i1=B.indexOf(4000);const ref=l.slice(i0,
 function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
 if(c.width!==w||c.height!==h){c.width=w;c.height=h}
 const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
-function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
-g.fillStyle='#000';g.fillRect(0,0,W,H);
+function chartColors(){if(CC)return CC;const s=getComputedStyle(document.documentElement),p=n=>s.getPropertyValue(n).trim();
+CC={bg:p('--chart-bg')||'#000',line:p('--chart-line')||'#fff',grid:p('--chart-grid')||'rgba(205,205,205,.3)',ref:p('--chart-ref')||'rgba(225,225,225,.5)',label:p('--chart-label')||'rgba(220,220,220,.65)',cmp:p('--chart-cmp')||'#2f86c7'};return CC}
+function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),col=chartColors();g.clearRect(0,0,W,H);
+g.fillStyle=col.bg;g.fillRect(0,0,W,H);
 const bw=W/B.length,mid=H/2,k=H/28;
-g.strokeStyle='rgba(205,205,205,.3)';g.lineWidth=1;g.setLineDash([4,4]);
+g.strokeStyle=col.grid;g.lineWidth=1;g.setLineDash([4,4]);
 [3,6].forEach(dBv=>{g.beginPath();g.moveTo(0,mid-dBv*k);g.lineTo(W,mid-dBv*k);g.stroke();g.beginPath();g.moveTo(0,mid+dBv*k);g.lineTo(W,mid+dBv*k);g.stroke()});
 g.setLineDash([]);
-g.strokeStyle='rgba(225,225,225,.5)';g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+g.strokeStyle=col.ref;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
-g.lineWidth=1.1;g.strokeStyle='#ffffff';g.lineJoin='miter';g.lineCap='butt';g.stroke();
+g.lineWidth=1.1;g.strokeStyle=col.line;g.lineJoin='miter';g.lineCap='butt';g.stroke();
 if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=1;i<cpts.length;i++)g.lineTo(cpts[i][0],cpts[i][1]);
-g.setLineDash([6,4]);g.lineWidth=1.1;g.strokeStyle='#2f86c7';g.stroke();g.setLineDash([])}
-g.fillStyle='rgba(220,220,220,.65)';g.font='12px sans-serif';g.textAlign='left';
-[[20,'20'],[100,'100'],[1000,'1k'],[10000,'10k']].forEach(([f,t])=>g.fillText(t,B.indexOf(f)*bw+2,H-4));
-g.textAlign='right';g.fillText('20k',W-2,H-4);g.textAlign='left'}
-function drawMini(v,c){const {g,W,H}=fitCanvas(c);g.clearRect(0,0,W,H);
-g.fillStyle='#000';g.fillRect(0,0,W,H);
+g.setLineDash([6,4]);g.lineWidth=1.1;g.strokeStyle=col.cmp;g.stroke();g.setLineDash([])}
+g.fillStyle=col.label;g.font='12px sans-serif';g.textAlign='left';
+const fmtHz=f=>f>=1000?((f/1000).toFixed(f%1000?1:0).replace(/\.0$/,''))+'k':String(f);
+const labelIdx=[0,5,10,15,20,25];
+labelIdx.forEach(i=>g.fillText(fmtHz(B[i]),i*bw+2,H-4));
+g.textAlign='right';g.fillText(fmtHz(B[30]),W-2,H-4);g.textAlign='left'}
+function drawMini(v,c){const {g,W,H}=fitCanvas(c),col=chartColors();g.clearRect(0,0,W,H);
+g.fillStyle=col.bg;g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
-g.strokeStyle='rgba(225,225,225,.35)';g.lineWidth=1;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
+g.strokeStyle=col.ref;g.lineWidth=1;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
 const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
-g.lineWidth=1;g.strokeStyle='#ffffff';g.lineJoin='miter';g.stroke()}
+g.lineWidth=1;g.strokeStyle=col.line;g.lineJoin='miter';g.stroke()}
 let liveEmaDisp=null;
+function clipRatio(){const td=new Float32Array(an.fftSize);an.getFloatTimeDomainData(td);let c=0;for(let i=0;i<td.length;i++)if(Math.abs(td[i])>0.97)c++;return c/td.length}
+function ambientDbfs(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);let s=0,k=0;
+for(let i=1;i<d.length;i++){if(isFinite(d[i])){s+=Math.pow(10,d[i]/10);k++}}return k?10*Math.log10(s/k+1e-20):-100}
+function sampleAmbient(ms,step){return new Promise(res=>{const vals=[];const iv=setInterval(()=>{vals.push(ambientDbfs());if(vals.length*step>=ms){clearInterval(iv);res(vals.reduce((a,b)=>a+b,0)/vals.length)}},step)})}
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
+clipFrame++;if(clipFrame%6===0){const clipNow=clipRatio()>0.001;$('clipWarn').style.display=clipNow?'block':'none';if(clipNow&&mesuring)clipDuringMes=true}
 const r=rel(l);if(!liveEmaDisp||liveEmaDisp.length!==r.length)liveEmaDisp=r.slice();else r.forEach((v,i)=>liveEmaDisp[i]=liveEmaDisp[i]*.82+v*.18);
 draw(liveEmaDisp);requestAnimationFrame(loop)}
 let selectedMicId='';
@@ -398,7 +440,7 @@ const constraints={echoCancellation:false,noiseSuppression:false,autoGainControl
 if(selectedMicId)constraints.deviceId={exact:selectedMicId};
 stream=await navigator.mediaDevices.getUserMedia({audio:constraints});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;src=ctx.createMediaStreamSource(stream);src.connect(an);
-liveEmaDisp=null;
+liveEmaDisp=null;multiPoints=[];clipDuringMes=false;
 $('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Courbe blanche : réponse mesurée. Pointillés gris : zones de tolérance.';loop();
 setupOutputPicker()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
@@ -410,7 +452,21 @@ $('outSel').innerHTML=outs.map(d=>`<option value="${d.deviceId}">${d.label||'Sor
 $('outWrap').style.display='block';
 $('outSel').onchange=()=>{ctx.setSinkId($('outSel').value).catch(()=>{})}
 }catch(e){}}
-$('bnoise').onclick=()=>{if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose';return}
+function ambientWarningModal(){return new Promise(res=>{
+const m=document.createElement('div');m.className='modal';
+m.innerHTML=`<div class="box"><h2 style="margin-top:0">Bruit ambiant détecté</h2>
+<p>Il y a du bruit dans la salle en ce moment (discussions, activité…). Ce n'est pas toujours évitable, mais ça peut fausser un peu le résultat de la mesure.</p>
+<p class="mut">Idéalement, attends un moment plus calme. Sinon, tu peux lancer quand même : le résultat restera une bonne indication générale.</p>
+<button id="ambGo">Lancer quand même</button>
+<button id="ambCancel" class="sec">Attendre un peu</button></div>`;
+document.body.appendChild(m);
+$('ambGo').onclick=()=>{m.remove();res(true)};
+$('ambCancel').onclick=()=>{m.remove();res(false)}})}
+$('bnoise').onclick=async()=>{if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose';return}
+$('bnoise').disabled=true;const amb=await sampleAmbient(400,80);$('bnoise').disabled=false;
+if(amb>-28){const go=await ambientWarningModal();if(!go)return}
+startNoise()};
+function startNoise(){
 const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
 for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
 const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[len-xf+i]*(1-k)+s*k}
@@ -418,7 +474,26 @@ noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.cre
 $('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
 requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.style.width='100%'});
 lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
-dev=rel(acc.map(v=>10*Math.log10(v/n)));if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}result(dev)}},1000)};
+if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}
+multiPoints.push(acc.map(v=>v/n));
+const multiOn=document.body.classList.contains('expert')&&$('multiToggle').checked;
+if(multiOn&&multiPoints.length<5){
+$('multiStatus').style.display='block';$('multiStatus').textContent=multiPoints.length+' point'+(multiPoints.length>1?'s':'')+' enregistré'+(multiPoints.length>1?'s':'')+'.';
+multiPointModal(multiPoints.length).then(c=>{if(c==='finish')finalizeMulti()})
+}else finalizeMulti()}},1000)};
+function multiPointModal(k){return new Promise(res=>{
+const m=document.createElement('div');m.className='modal';
+m.innerHTML=`<div class="box"><h2 style="margin-top:0">Point ${k} enregistré</h2>
+<p>Déplace le micro à un autre endroit de la salle (fond, côté, autre rangée…) pour une moyenne plus fiable, puis relance une analyse. Ou termine ici.</p>
+<button id="mpAdd">Ajouter un point</button>
+<button id="mpFinish" class="sec">Terminer, voir le résultat</button></div>`;
+document.body.appendChild(m);
+$('mpAdd').onclick=()=>{m.remove();res('add')};
+$('mpFinish').onclick=()=>{m.remove();res('finish')}})}
+function finalizeMulti(){const nb=multiPoints.length;
+const combined=B.map((_,i)=>multiPoints.reduce((s,p)=>s+p[i],0)/nb);
+dev=rel(combined.map(v=>10*Math.log10(v+1e-20)));
+multiPoints=[];$('multiStatus').style.display='none';result(dev)}
 const avg=(a,i,j)=>a.slice(i,j).reduce((x,y)=>x+y,0)/(j-i);
 function advice(d){const a=[],s=$('salle').value,g=avg(d,B.indexOf(50),B.indexOf(100)),h=avg(d,B.indexOf(4000),B.length),m=avg(d,B.indexOf(160),B.indexOf(315));
 const add=(c,t)=>a.push(`<div class="li"><span class="tag ${c}">${c==='ok'?'OK':'À régler'}</span>${t}</div>`);
@@ -471,7 +546,7 @@ box.innerHTML='<span class="lbl">Résumé</span><p>'+txt.replace(/</g,'&lt;')+'<
 function loadBias(){try{return JSON.parse(localStorage.getItem('cts_bias')||'{}')}catch(e){return{}}}
 function saveBias(b){try{localStorage.setItem('cts_bias',JSON.stringify(b))}catch(e){}}
 let lastCtx=null;
-function result(d){show('s3');draw(d,'cvRes');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
+function result(d){show('s3');$('clipResWarn').style.display=clipDuringMes?'block':'none';clipDuringMes=false;draw(d,'cvRes');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
 const bias=loadBias(),lieuKey=$('salle').value,bAdj=(bias[lieuKey]&&bias[lieuKey].thrAdj)||0;
 const thr=V('thr',3)+bAdj,mc=V('mcut',6),qq=V('qv',0);
 $('bands').innerHTML='<tr><th>Fréq.</th><th>Écart</th></tr>'+d.map((x,i)=>`<tr><td>${B[i]} Hz</td><td>${x>0?'+':''}${x.toFixed(1)} dB</td></tr>`).join('');
@@ -506,7 +581,7 @@ if(!ok)bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj+0.5));else bias[k]
 saveBias(bias);
 if(!AI_WORKER_URL.includes('VOTRE-WORKER')){fetch(AI_WORKER_URL.replace(/\/$/,'')+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lastMeasureId,lieu:k,satisfied:ok,comment:comment||'',ts:Date.now()})}).catch(()=>{})}
 $('fb').innerHTML='<p class="thx">Merci, c\'est pris en compte pour les prochaines mesures.</p>'}
-$('again').onclick=()=>show('s2');
+$('again').onclick=()=>{multiPoints=[];$('multiStatus').style.display='none';show('s2')};
 const setM=e=>{document.body.classList.toggle('expert',e);$('mE').classList.toggle('on',e);$('mB').classList.toggle('on',!e);$('mE').setAttribute('aria-pressed',e);$('mB').setAttribute('aria-pressed',!e)};
 $('mB').onclick=()=>setM(false);$('mE').onclick=()=>setM(true);
 $('cp').onclick=async()=>{try{await navigator.clipboard.writeText([...$('peq').querySelectorAll('tr')].map(r=>[...r.cells].map(c=>c.textContent).join('\t')).join('\n'));$('cp').textContent='Copié'}catch(e){$('cp').textContent='Copie impossible'}};
