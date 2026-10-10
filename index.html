@@ -13,23 +13,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0b0a08;--fg:#e8dcc5;--mut:#a69878;--pn:#161410;--ac:#2f86c7;--ok:#7a9b6e;--bad:#b85c4e;--ln:#332e24;
---chart-bg:#000000;--chart-line:#ffffff;--chart-grid:rgba(205,205,205,.3);--chart-ref:rgba(225,225,225,.5);--chart-label:rgba(220,220,220,.65);--chart-cmp:#2f86c7;
+--track:#1d1a14;--card2:#1b1812;--chart-grid2:rgba(255,255,255,.07);--chart-bg:#000000;--chart-line:#ffffff;--chart-grid:rgba(205,205,205,.3);--chart-ref:rgba(225,225,225,.5);--chart-label:rgba(220,220,220,.65);--chart-cmp:#2f86c7;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html[data-theme="light"] canvas{border:1px solid var(--ln)}
-html[data-theme="light"]{--bg:#f7f3ea;--fg:#2a2415;--mut:#746a52;--pn:#ffffff;--ac:#2f86c7;--ok:#4f6b45;--bad:#a23b2b;--ln:#e3dac4;
+html[data-theme="light"]{--track:#e7dfca;--card2:#faf6ec;--chart-grid2:rgba(0,0,0,.07);--bg:#f7f3ea;--fg:#2a2415;--mut:#746a52;--pn:#ffffff;--ac:#2f86c7;--ok:#4f6b45;--bad:#a23b2b;--ln:#e3dac4;
 --chart-bg:#ffffff;--chart-line:#1c1a14;--chart-grid:rgba(60,55,40,.28);--chart-ref:rgba(40,36,24,.45);--chart-label:rgba(50,46,32,.68);--chart-cmp:#1f5f8f}
 *{box-sizing:border-box}html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font:500 17px/1.45 'Barlow Semi Condensed',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:16px}
-h1{font-size:30px;margin:0 0 4px;letter-spacing:.5px}h2{font-size:22px;margin:0 0 8px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:.5px}h2{font-size:26px;margin:0 0 10px;letter-spacing:.2px}
 p{margin:0 0 12px}.mut{color:var(--mut)}
-section{background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:16px;margin:14px 0}
+section{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:18px;margin:14px 0}
 section.off{display:none}
 label{display:block;font-weight:700;margin:12px 0 4px}
 select,input[type=file]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}
-button{font:700 18px inherit;font-family:inherit;padding:14px 18px;border-radius:8px;border:0;background:var(--ac);color:#f3ead9;width:100%;margin-top:12px;position:relative;overflow:hidden}
+button{font:700 18px inherit;font-family:inherit;padding:14px 18px;border-radius:10px;border:0;background:var(--ac);color:#f3ead9;width:100%;margin-top:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:filter .15s,transform .12s,background .2s,border-color .2s}
 button.sec{background:transparent;color:var(--fg);border:2px solid var(--ln)}
-button.on{background:var(--ok);border-color:var(--ok)}
-button:disabled{opacity:.75}
+button.on{background:var(--ok);border-color:var(--ok);color:#f3ead9}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.on:disabled{opacity:1}
 button .prog{position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(255,255,255,.28);z-index:0}
 button .lbl{position:relative;z-index:1}
 button:focus-visible,select:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
@@ -49,8 +50,8 @@ canvas{width:100%;height:220px;display:block;background:var(--bg);border-radius:
 .bad{color:var(--bad)}.ok{color:var(--ok)}
 .seg{display:flex;gap:8px;margin:12px 0}.seg button{margin:0;background:transparent;border:2px solid var(--ln);color:var(--fg)}.seg button.on{background:var(--ac);border-color:var(--ac);color:#f3ead9}body:not(.expert) .exp{display:none}details{margin-top:8px}summary{font-weight:700;padding:8px 0}input[type=number],input[type=text]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--fg)}.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--ln)}
 .pl{border-left:3px solid var(--ln);padding:2px 14px;margin:14px 0}.pl h3{margin:0 0 4px;font-size:18px}.pl .prix{color:var(--ac);font-weight:700}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50}
-.modal .box{background:var(--pn);border:1px solid var(--ln);border-radius:14px 14px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fadeIn .18s ease}
+.modal .box{animation:rise .22s ease;background:var(--pn);border:1px solid var(--ln);border-radius:14px 14px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%}
 .err{color:var(--bad);margin:-6px 0 10px;font-size:14px}
 .codeInput{letter-spacing:8px;font-size:24px;text-align:center}
 @media print{
@@ -117,23 +118,105 @@ canvas{height:280px}
 .appShell{max-width:1240px;gap:80px}
 .main{max-width:760px}
 }
+
+/* ===== Design v2 ===== */
+.ic{width:1.15em;height:1.15em;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button .ic{position:relative;z-index:1}
+button:active:not(:disabled){transform:scale(.985)}
+button.danger{background:var(--bad)}
+.dropdown button{justify-content:flex-start;gap:12px}.dropdown .ic{width:1.2em;height:1.2em;opacity:.85}
+.iconBtn{display:grid;place-items:center}.iconBtn .ic{width:22px;height:22px}
+.brand{display:flex;align-items:center;gap:10px}.brand svg{width:34px;height:34px;flex:none}.brand h1{margin:0}
+/* hiérarchie des actions de l'étape mesure : une seule action principale à la fois */
+#bnoise,#bmes{background:transparent;border:2px solid var(--ln);color:var(--fg)}
+#bnoise:disabled,#bmes:disabled{color:var(--mut);opacity:.55}
+#bnoise:not(:disabled):not(.on),#bnoise.on~#bmes:not(:disabled):not(.on){background:var(--ac);border-color:var(--ac);color:#f3ead9}
+#bnoise.on,#bmes.on{background:var(--ok);border-color:var(--ok);color:#f3ead9}
+/* indicateur d'étapes */
+.stepper{display:flex;align-items:center;gap:10px;margin:0 0 16px}
+.stepper .st{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+.stepper .st i{font-style:normal;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ln);display:grid;place-items:center;font-size:12px;letter-spacing:0;flex:none;font-variant-numeric:tabular-nums}
+.stepper .st.on{color:var(--fg)}.stepper .st.on i{background:var(--ac);border-color:var(--ac);color:#fff}
+.stepper .st.done i{background:var(--ok);border-color:var(--ok);color:#fff}
+.stepper .bar{flex:1;height:2px;background:var(--ln);border-radius:2px;min-width:12px}.stepper .bar.done{background:var(--ok)}
+.stepper .st:not(.on) span{display:none}
+.secH{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin:18px 0 2px;font-weight:700}
+/* accueil */
+.hero{text-align:center;padding:6px 0 2px}.hero .logo{width:84px;height:84px;margin:0 auto 14px;display:block}
+.hero h2{font-size:32px;line-height:1.08;margin:0 0 10px}.hero p{max-width:36ch;margin:0 auto 6px;color:var(--mut)}
+.modeGrid{display:flex;flex-direction:column;gap:10px;margin:16px 0 8px}
+.modeCard{display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--ln);border-radius:12px;padding:14px 16px;text-align:left}
+.modeCard .mi{width:42px;height:42px;border-radius:11px;background:rgba(47,134,199,.14);color:var(--ac);display:grid;place-items:center;flex:none}.modeCard .mi .ic{width:22px;height:22px}
+.modeCard h3{margin:0 0 2px;font-size:18px}.modeCard p{margin:0;color:var(--mut);font-size:15px;max-width:none}
+/* carte graphique */
+.chartCard{border:1px solid var(--ln);border-radius:12px;overflow:hidden;background:var(--chart-bg);margin:6px 0 4px}
+.chartHead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--ln);font-size:12px;letter-spacing:.9px;text-transform:uppercase;font-weight:700;color:var(--mut);background:var(--card2)}
+.chartHead small{font-weight:600;letter-spacing:.4px;margin-left:8px;opacity:.8;text-transform:none;font-size:12px}
+.chartState{display:flex;align-items:center;gap:7px;white-space:nowrap}.chartState::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.chartState.live{color:var(--ok)}.chartState.live::before{background:var(--ok);animation:pulse 1.6s infinite}
+.chartState.rec{color:var(--bad)}.chartState.rec::before{background:var(--bad);animation:pulse .9s infinite}
+.chartCard canvas{border-radius:0;border:0;touch-action:pan-y;cursor:crosshair}
+html[data-theme="light"] .chartCard canvas{border:0}
+/* vumètre */
+.meterRow{display:flex;align-items:center;gap:10px;margin:12px 0 2px;font-size:12px;letter-spacing:.9px;text-transform:uppercase;font-weight:700;color:var(--mut)}
+.meter{position:relative;flex:1;height:9px;border-radius:5px;background:linear-gradient(90deg,var(--ok) 0 68%,#e0a100 68% 90%,var(--bad) 90% 100%);overflow:hidden}
+.meterCover{position:absolute;top:0;right:0;bottom:0;width:100%;background:var(--track);transition:width .08s linear}
+.meterPeak{position:absolute;top:0;bottom:0;width:2px;background:var(--fg);left:0;transition:left .08s linear}
+.meterVal{min-width:58px;text-align:right;font-variant-numeric:tabular-nums;letter-spacing:0}
+#meterHint{margin:2px 0 6px;font-size:14px;min-height:1.4em}
+.warnLine{display:none;align-items:center;gap:8px;color:var(--bad);font-weight:600;margin:6px 0 0}
+/* diagnostic */
+.diag{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:2px 0 14px}.diag>*{min-width:0}
+.score{display:flex;align-items:center;gap:16px;background:var(--card2);border:1px solid var(--ln);border-radius:12px;padding:14px 16px}
+.scoreNum{font-size:48px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}.scoreNum small{font-size:16px;color:var(--mut);margin-left:2px;font-weight:600}
+.scoreInfo{flex:1;min-width:0}.scoreInfo b{display:block;font-size:17px}.scoreInfo span{display:block;color:var(--mut);font-size:15px;margin:2px 0 8px}
+.scoreBar{height:6px;border-radius:4px;background:var(--track);overflow:hidden}.scoreBar i{display:block;height:100%;border-radius:4px;background:var(--ok)}
+.score.warn .scoreBar i{background:#e0a100}.score.bad .scoreBar i{background:var(--bad)}
+.bandCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bc{background:var(--card2);border:1px solid var(--ln);border-top:3px solid var(--ok);border-radius:10px;padding:10px 12px}
+.bc.warn{border-top-color:#e0a100}.bc.bad{border-top-color:var(--bad)}
+.bcTitle{display:block;font-size:12px;letter-spacing:.9px;text-transform:uppercase;font-weight:700;color:var(--mut)}
+.bcVal{display:block;font-size:clamp(18px,5.4vw,24px);font-weight:700;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bcSt{display:block;font-size:14px;color:var(--ok)}.bc.warn .bcSt{color:#e0a100}.bc.bad .bcSt{color:var(--bad)}
+#cmpNote{margin:6px 0 0;font-size:14px}.tbl,.bcVal,#st{font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:26px 8px;color:var(--mut)}.empty .ic{width:44px;height:44px;opacity:.55;stroke-width:1.4;margin-bottom:8px}
+.box input[type=text]{margin-top:6px}
+/* mouvements */
+@keyframes pulse{50%{opacity:.25}}@keyframes fadeIn{from{opacity:0}}@keyframes rise{from{transform:translateY(16px);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}}
+section:not(.off){animation:fadeUp .28s ease}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#st{margin-top:12px}@media (max-width:1023px){.tagline{display:none}}
+@media (min-width:720px){
+.stepper .st:not(.on) span{display:inline}
+.modal{align-items:center}.modal .box{border-radius:16px;max-width:460px;padding:24px}
+.modeGrid{flex-direction:row}.modeCard{flex-direction:column;flex:1}
+}
+@media (min-width:1024px){.appShell{max-width:1280px}.main{max-width:none}.main>section{max-width:760px}.hero h2{font-size:36px}}
+@media (min-width:1200px){
+.main>#s3{max-width:none}
+#s3 .resGrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:8px 32px;align-items:start}
+#s3 .resGrid .full{grid-column:1/-1}
+}
+@media print{#shareBtn{display:none!important}}
 </style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol><symbol id="i-speaker" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol><symbol id="i-bars" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol><symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol><symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></symbol><symbol id="i-wave" viewBox="0 0 24 24"><polyline points="2 12 5 12 7 5 10 19 13 8 16 15 18 12 22 12"/></symbol><symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol></svg>
 <div class="appShell">
 <div class="sidebar">
 <header>
-<div><h1>CTS</h1>
-<p class="mut" style="margin:-6px 0 12px;font-size:14px">Cales Ta Sono</p>
+<div><div class="brand"><svg class="logoMini" viewBox="0 0 512 512" aria-hidden="true"><rect x="36" y="36" width="440" height="440" rx="112" fill="#0b0a08" stroke="#332e24" stroke-width="6"/><g stroke-linecap="round" stroke-width="42"><line x1="144" y1="372" x2="144" y2="304" stroke="#2f86c7"/><line x1="200" y1="372" x2="200" y2="236" stroke="#e8dcc5"/><line x1="256" y1="372" x2="256" y2="170" stroke="#2f86c7"/><line x1="312" y1="372" x2="312" y2="260" stroke="#e8dcc5"/><line x1="368" y1="372" x2="368" y2="322" stroke="#2f86c7"/></g></svg><h1>CTS</h1></div>
+<p class="mut" style="margin:2px 0 12px;font-size:14px">Cales Ta Sono</p>
 <p class="mut tagline">Règle ta sono sans ingénieur du son. Version de test : mesure guidée et conseils.</p></div>
 <div class="menuWrap">
-<button id="menuBtn" class="iconBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">☰</button>
+<button id="menuBtn" class="iconBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-menu"/></svg></button>
 <div id="menuDrop" class="dropdown off" role="menu">
-<button id="mHome" role="menuitem">🏠 Accueil</button>
-<button id="mNew" role="menuitem">🎛️ Choix d'analyse</button>
-<button id="mHist" role="menuitem">📜 Analyses passées</button>
-<button id="mChat" role="menuitem">🤖 Assistant IA</button>
-<button id="mChecklist" role="menuitem">✅ Checklist avant concert</button>
-<button id="mSettings" role="menuitem">⚙️ Réglages</button>
-<button id="mCgu" role="menuitem">📄 CGU</button>
+<button id="mHome" role="menuitem"><svg class="ic"><use href="#i-home"/></svg>Accueil</button>
+<button id="mNew" role="menuitem"><svg class="ic"><use href="#i-sliders"/></svg>Choix d'analyse</button>
+<button id="mHist" role="menuitem"><svg class="ic"><use href="#i-clock"/></svg>Analyses passées</button>
+<button id="mChat" role="menuitem"><svg class="ic"><use href="#i-chat"/></svg>Assistant IA</button>
+<button id="mChecklist" role="menuitem"><svg class="ic"><use href="#i-check"/></svg>Checklist avant concert</button>
+<button id="mSettings" role="menuitem"><svg class="ic"><use href="#i-gear"/></svg>Réglages</button>
+<button id="mCgu" role="menuitem"><svg class="ic"><use href="#i-doc"/></svg>CGU</button>
 </div>
 </div>
 </header>
@@ -141,21 +224,24 @@ canvas{height:280px}
 </div>
 <div class="main">
 
-<section id="sWelcome"><h2>Bienvenue</h2>
-<p>CTS t'aide à régler ta sono sans ingénieur du son, avec trois façons de t'en servir :</p>
+<section id="sWelcome">
+<div class="hero"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><rect x="36" y="36" width="440" height="440" rx="112" fill="#0b0a08" stroke="#332e24" stroke-width="6"/><g stroke-linecap="round" stroke-width="42"><line x1="144" y1="372" x2="144" y2="304" stroke="#2f86c7"/><line x1="200" y1="372" x2="200" y2="236" stroke="#e8dcc5"/><line x1="256" y1="372" x2="256" y2="170" stroke="#2f86c7"/><line x1="312" y1="372" x2="312" y2="260" stroke="#e8dcc5"/><line x1="368" y1="372" x2="368" y2="322" stroke="#2f86c7"/></g></svg><h2>Règle ta sono comme un pro, sans ingénieur du son.</h2>
+<p>Mesure ta salle avec ton téléphone, vois ce qui cloche et corrige-le, étape par étape.</p></div>
 <div class="modeGrid">
-<div class="pl"><h3>Basique</h3><p>Mesure guidée et conseils en français simple, pour s'y retrouver rapidement.</p></div>
-<div class="pl"><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur.</p></div>
-<div class="pl"><h3>Live</h3><p>Suivi en continu pendant la soirée, avec des alertes douces en cas de dérive du son.</p></div>
+<div class="modeCard"><div class="mi"><svg class="ic"><use href="#i-wave"/></svg></div><div><h3>Basique</h3><p>Mesure guidée et conseils en français simple, pour s'y retrouver rapidement.</p></div></div>
+<div class="modeCard"><div class="mi"><svg class="ic"><use href="#i-sliders"/></svg></div><div><h3>Expert</h3><p>Réglages avancés, filtres précis, reconnaissance de ton processeur, multi-points.</p></div></div>
+<div class="modeCard"><div class="mi"><svg class="ic"><use href="#i-radio"/></svg></div><div><h3>Live</h3><p>Suivi en continu pendant la soirée, avec des alertes douces en cas de dérive du son.</p></div></div>
 </div>
-<button id="wOk">Continuer</button></section>
+<button id="wOk">Commencer</button></section>
 
-<section id="s1" class="off"><h2>Étape 1/3 — Ton installation</h2>
-<label for="profSel">📂 Profil de salle enregistré</label>
+<section id="s1" class="off"><div class="stepper" data-n="1"></div><h2>Ton installation</h2>
+<label for="profSel">Profil de salle enregistré</label>
 <select id="profSel"><option value="">— Aucun —</option></select>
-<div class="row3"><button id="profLoad" class="sec">Charger</button><button id="profSave" class="sec">💾 Enregistrer</button><button id="profDel" class="sec">Supprimer</button></div>
+<div class="row3"><button id="profLoad" class="sec"><svg class="ic"><use href="#i-folder"/></svg>Charger</button><button id="profSave" class="sec"><svg class="ic"><use href="#i-save"/></svg>Enregistrer</button><button id="profDel" class="sec"><svg class="ic"><use href="#i-trash"/></svg>Supprimer</button></div>
 <label for="salle" style="margin-top:18px">Lieu</label>
 <select id="salle"><option value="1">Petite salle (bar, salle de classe)</option><option value="2" selected>Salle moyenne (salle des fêtes)</option><option value="3">Grande salle ou très réverbérante</option><option value="4">En plein air</option></select>
+<label for="occ">La salle pendant la mesure</label>
+<select id="occ"><option value="vide">Vide (avant l'arrivée du public)</option><option value="public">Avec du public</option></select>
 <label for="proc">Avec quoi tu règles le son ?</label>
 <p class="mut" style="margin:0 0 6px">C'est l'appareil où tu règles le son avant les enceintes. Pas sûr ? Laisse « Je ne sais pas ».</p>
 <select id="proc"><option value="3">Je ne sais pas</option><option value="3">Une petite table de mixage (boutons graves / médiums / aigus)</option><option value="4">Une table de mixage numérique (X32, XR18, Yamaha, Allen &amp; Heath…)</option><option value="9">Un processeur d'enceintes (DriveRack, miniDSP, Lake…)</option><option value="8">Un logiciel ou un appareil avec égaliseur paramétrique libre</option></select>
@@ -175,39 +261,48 @@ canvas{height:280px}
 <label for="nf">Nombre de filtres disponibles (vide = selon l'appareil)</label><input type="number" id="nf" min="1" max="31"></div>
 <button id="go1">Continuer</button></section>
 
-<section id="s2" class="off"><h2>Étape 2/3 — Mesure</h2>
+<section id="s2" class="off"><div class="stepper" data-n="2"></div><h2>Mesure</h2>
 <p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
-<canvas id="cv" width="560" height="220"></canvas>
-<p id="clipWarn" style="display:none;color:var(--bad);font-weight:600;margin:8px 0 0">⚠️ Signal saturé : baisse le volume de la sono ou éloigne le micro.</p>
+<div class="chartCard"><div class="chartHead"><span>RTA<small>1/3 d'octave</small></span><span class="chartState" id="cvState">Micro inactif</span></div><canvas id="cv" width="560" height="220"></canvas></div>
+<div class="meterRow"><span>Niveau</span><div class="meter"><div class="meterCover" id="meterCover"></div><div class="meterPeak" id="meterPeak"></div></div><span class="meterVal" id="meterVal">— dB</span></div>
+<p id="meterHint" class="mut"></p>
+<p id="clipWarn" class="warnLine"><svg class="ic"><use href="#i-alert"/></svg><span>Signal saturé : baisse le volume de la sono ou éloigne le micro.</span></p>
 <div class="exp" id="multiBox" style="margin-top:14px">
 <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="multiToggle" style="width:auto;margin:0">Mesure multi-points (moyenne de plusieurs positions, jusqu'à 5)</label>
 <p class="mut" id="multiStatus" style="display:none;margin:6px 0 0"></p>
 </div>
-<button id="bmic"><span class="lbl">🎙️ Activer le micro</span></button>
+<button id="bmic"><svg class="ic"><use href="#i-mic"/></svg><span class="lbl">Activer le micro</span></button>
 <div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
-<button id="bnoise" disabled><span class="lbl">🔊 Lancer le bruit rose</span></button>
-<button id="bmes" disabled><span class="lbl">📊 Analyser</span><span class="prog" id="bmesProg"></span></button>
+<button id="bnoise" disabled><svg class="ic"><use href="#i-speaker"/></svg><span class="lbl">Lancer le bruit rose</span></button>
+<button id="bmes" disabled><svg class="ic"><use href="#i-bars"/></svg><span class="lbl">Analyser</span><span class="prog" id="bmesProg"></span></button>
 <p id="st" class="mut"></p></section>
 
-<section id="s3" class="off"><h2>Étape 3/3 — Résultat</h2>
-<div id="clipResWarn" style="display:none;background:rgba(184,92,78,.15);border:1px solid var(--bad);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-weight:600;color:var(--bad)">⚠️ Saturation détectée pendant la mesure : le résultat peut être faussé. Baisse le volume et refais la mesure si possible.</div>
+<section id="s3" class="off"><div class="stepper" data-n="3"></div><h2>Résultat</h2>
+<div id="clipResWarn" class="warnLine" style="background:rgba(184,92,78,.12);border:1px solid var(--bad);border-radius:10px;padding:10px 12px;margin:0 0 12px"><svg class="ic"><use href="#i-alert"/></svg><span>Saturation détectée pendant la mesure : le résultat peut être faussé. Baisse le volume et refais la mesure si possible.</span></div>
 <div id="ai" style="display:none"></div>
-<canvas id="cvRes" width="560" height="220"></canvas>
+<div class="resGrid">
+<div id="diag" class="diag full"></div>
+<div class="resL">
+<div class="chartCard"><div class="chartHead"><span>Courbe mesurée<small>écart vs cible</small></span><span class="chartState">Moyenne</span></div><canvas id="cvRes" width="560" height="220"></canvas></div>
 <div id="cmpWrap"><label for="cmpSel">Comparer à une analyse précédente</label>
-<select id="cmpSel"><option value="">— Aucune —</option></select></div>
-<div id="adv"></div>
+<select id="cmpSel"><option value="">— Aucune —</option></select><p id="cmpNote" class="mut"></p></div>
 <details id="dt"><summary>Réglages précis (filtres)</summary>
 <div class="tbl"><table id="peq"></table></div></details>
 <div class="exp"><h2 style="margin-top:16px">Écart par bande</h2><div class="tbl"><table id="bands"></table></div><button id="cp" class="sec">Copier les filtres</button></div>
+</div>
+<div class="resR">
+<h3 class="secH">Conseils</h3><div id="adv"></div>
 <div id="fb"></div>
-<button id="exportBtn" class="sec">🖨️ Imprimer / Exporter en PDF</button>
-<button id="goLive" class="sec">🔴 Passer en mode Live (pendant la soirée)</button>
-<button id="again" class="sec">🔁 Refaire une mesure</button></section>
+<button id="shareBtn" class="sec"><svg class="ic"><use href="#i-share"/></svg>Partager en image</button>
+<button id="exportBtn" class="sec"><svg class="ic"><use href="#i-printer"/></svg>Imprimer / Exporter en PDF</button>
+<button id="goLive" class="sec"><svg class="ic"><use href="#i-radio"/></svg>Passer en mode Live (pendant la soirée)</button>
+<button id="again" class="sec"><svg class="ic"><use href="#i-repeat"/></svg>Refaire une mesure</button>
+</div></div></section>
 
 <section id="s4" class="off"><h2>Mode Live</h2>
 <p class="mut">Garde cette page ouverte pendant la soirée. La courbe suit la tendance du son sur plusieurs dizaines de secondes : les variations normales d'un morceau à l'autre ne déclenchent pas d'alerte. Évite de verrouiller l'écran, le micro se coupe sinon.</p>
 <span id="liveBadge" class="badge ok">Ça tient bon</span>
-<canvas id="cvLive" width="560" height="220"></canvas>
+<div class="chartCard"><div class="chartHead"><span>Dérive<small>par rapport à la référence</small></span><span class="chartState live">Live</span></div><canvas id="cvLive" width="560" height="220"></canvas></div>
 <div id="liveLog"></div>
 <button id="liveReset" class="sec">Nouvelle référence maintenant</button>
 <button id="liveStop" class="sec">Quitter le mode live</button>
@@ -239,7 +334,7 @@ canvas{height:280px}
 
 <section id="sSettings" class="off"><h2>Réglages</h2>
 <label>Apparence</label>
-<div class="seg" role="group" aria-label="Thème"><button id="themeDark" class="on" aria-pressed="true">🌙 Sombre</button><button id="themeLight" aria-pressed="false">☀️ Clair</button></div>
+<div class="seg" role="group" aria-label="Thème"><button id="themeDark" class="on" aria-pressed="true"><svg class="ic"><use href="#i-moon"/></svg>Sombre</button><button id="themeLight" aria-pressed="false"><svg class="ic"><use href="#i-sun"/></svg>Clair</button></div>
 <p class="mut">Le mode clair est plus lisible en plein jour, en extérieur.</p>
 <button id="settingsClose" class="sec">Fermer</button>
 </section>
@@ -250,7 +345,7 @@ canvas{height:280px}
 <p>Les mesures et conseils fournis sont approximatifs et dépendent de la qualité du micro, du lieu et des réglages. CTS et son auteur déclinent toute responsabilité en cas de dommage matériel (enceintes, amplis) lié à l'utilisation de l'outil : vérifie toujours tes niveaux avant d'augmenter un réglage.</p>
 <p>L'accès au micro sert uniquement à l'analyse en direct, dans ton navigateur. Aucun enregistrement audio n'est envoyé ni conservé.</p>
 <p>Tes réglages, ton historique d'analyses et tes préférences sont stockés uniquement sur ton appareil (stockage local du navigateur).</p>
-<p>À chaque mesure terminée, les écarts par bande de fréquence mesurés (le résultat de l'analyse acoustique), le type de lieu et le matériel renseigné sont envoyés de façon anonyme à un serveur, pour suivre dans le temps la fiabilité des conseils et les améliorer. Ces données ne contiennent ni nom, ni email, ni aucune information permettant de t'identifier. Si tu donnes un retour (👍/👎 et commentaire), il est rattaché à cette mesure, toujours de façon anonyme.</p>
+<p>À chaque mesure terminée, les écarts par bande de fréquence mesurés (le résultat de l'analyse acoustique), le type de lieu et le matériel renseigné sont envoyés de façon anonyme à un serveur, pour suivre dans le temps la fiabilité des conseils et les améliorer. Ces données ne contiennent ni nom, ni email, ni aucune information permettant de t'identifier. Si tu donnes un retour (pouce levé ou baissé, et commentaire), il est rattaché à cette mesure, toujours de façon anonyme.</p>
 <p>CTS est un projet personnel en développement, fourni « en l'état », sans garantie. Il peut évoluer ou être interrompu à tout moment.</p>
 <button id="cguBack" class="sec">Retour</button>
 </section>
@@ -269,28 +364,38 @@ const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4
 let mesInterval=null;
 function leaveCurrent(){
 if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
-if(mesInterval){clearInterval(mesInterval);mesInterval=null;mesuring=false;$('bmes').disabled=false;$('bmes').classList.remove('on');$('bmes').querySelector('.lbl').textContent='Analyser';$('bmesProg').style.transition='none';$('bmesProg').style.width='0%'}
+if(mesInterval){clearInterval(mesInterval);mesInterval=null;mesuring=false;if(an)setState('live','En direct');$('bmes').disabled=false;$('bmes').classList.remove('on');$('bmes').querySelector('.lbl').textContent='Analyser';$('bmesProg').style.transition='none';$('bmesProg').style.width='0%'}
 if(noise){try{noise.stop()}catch(e){}noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}
 }
+
+function ctsDialog(o){return new Promise(res=>{
+const m=document.createElement('div');m.className='modal';
+m.innerHTML=`<div class="box" role="dialog" aria-modal="true"><h2 style="margin-top:0">${o.title}</h2>${o.text?`<p class="mut">${o.text}</p>`:''}${o.input?`<input type="text" id="dlgInput" placeholder="${o.placeholder||''}" autocomplete="off">`:''}<button id="dlgOk"${o.danger?' class="danger"':''}>${o.ok||'OK'}</button><button id="dlgCancel" class="sec">${o.cancel||'Annuler'}</button></div>`;
+document.body.appendChild(m);const inp=m.querySelector('#dlgInput');if(inp)setTimeout(()=>inp.focus(),30);
+const close=v=>{m.remove();res(v)};
+m.querySelector('#dlgOk').onclick=()=>close(o.input?inp.value.trim():true);
+m.querySelector('#dlgCancel').onclick=()=>close(o.input?null:false);
+m.addEventListener('click',e=>{if(e.target===m)close(o.input?null:false)});
+if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')close(inp.value.trim());if(e.key==='Escape')close(null)})})}
 function loadHistory(){try{return JSON.parse(localStorage.getItem('cts_history')||'[]')}catch(e){return[]}}
 function saveHistory(rec){const h=loadHistory();h.unshift(rec);if(h.length>20)h.length=20;try{localStorage.setItem('cts_history',JSON.stringify(h))}catch(e){}}
 function renderHistory(){const h=loadHistory(),box=$('histList');
-if(!h.length){box.innerHTML='<p class="mut">Aucune analyse enregistrée pour l\'instant.</p>';return}
+if(!h.length){box.innerHTML='<div class="empty"><svg class="ic"><use href="#i-clock"/></svg><p>Aucune analyse enregistrée pour l\'instant.</p><button id="histStart">Faire une première mesure</button></div>';$('histStart').onclick=()=>{refreshMicList();show('s1')};return}
 box.innerHTML=h.map((r,i)=>{const d=new Date(r.ts),date=d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-return `<div class="histCard"><strong>${date}</strong><br><span class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</span>${r.dev?'<canvas class="histMini" data-i="'+i+'" width="280" height="80"></canvas>':''}<br><button class="sec" data-i="${i}" style="margin-top:8px">🔍 Voir le détail</button></div>`}).join('');
+return `<div class="histCard"><strong>${date}</strong><br><span class="mut">${r.lieu}${r.occ?' · '+(r.occ==='public'?'Avec public':'Salle vide'):''}${r.appareil?' — '+r.appareil:''}</span>${r.dev?'<canvas class="histMini" data-i="'+i+'" width="280" height="80"></canvas>':''}<br><button class="sec" data-i="${i}" style="margin-top:8px"><svg class="ic"><use href="#i-search"/></svg>Voir le détail</button></div>`}).join('');
 box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>showHistDetail(h[+b.dataset.i]));
 box.querySelectorAll('canvas.histMini').forEach(c=>drawMini(h[+c.dataset.i].dev,c))}
 function showHistDetail(r){const d=new Date(r.ts);
 $('histDetail').innerHTML=`<h3 style="margin-top:0">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</h3>
 <p class="mut">${r.lieu}${r.appareil?' — '+r.appareil:''}</p>
-${r.dev?'<canvas id="histDetCv" width="560" height="220"></canvas>':''}
+${r.diagHtml?'<div class="diag">'+r.diagHtml+'</div>':''}${r.dev?'<div class="chartCard"><canvas id="histDetCv" width="560" height="220"></canvas></div>':''}
 <div>${r.advHtml}</div>
 <details open><summary>Réglages précis (filtres)</summary><div class="tbl"><table>${r.peqHtml}</table></div></details>
 <button id="histBack" class="sec">Retour à la liste</button>`;
 $('histList').classList.add('off');$('histDetail').classList.remove('off');
-if(r.dev)draw(r.dev,'histDetCv');
+if(r.dev){attachHover($('histDetCv'));draw(r.dev,'histDetCv')}
 $('histBack').onclick=()=>{$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off')}}
-$('histClear').onclick=()=>{if(confirm('Effacer toutes les analyses enregistrées ?')){localStorage.removeItem('cts_history');renderHistory()}};
+$('histClear').onclick=async()=>{if(await ctsDialog({title:'Effacer l\'historique ?',text:'Toutes les analyses enregistrées sur cet appareil seront supprimées.',ok:'Effacer',danger:true})){localStorage.removeItem('cts_history');renderHistory()}};
 $('histClose').onclick=()=>show('s1');
 $('cguBack').onclick=()=>show('s1');
 const menuBtn=$('menuBtn'),menuDrop=$('menuDrop');
@@ -319,14 +424,14 @@ applyTheme(localStorage.getItem('cts_theme')==='light'?'light':'dark');
 function loadProfiles(){try{return JSON.parse(localStorage.getItem('cts_profiles')||'[]')}catch(e){return[]}}
 function saveProfiles(p){try{localStorage.setItem('cts_profiles',JSON.stringify(p))}catch(e){}}
 function renderProfSel(){const p=loadProfiles();$('profSel').innerHTML='<option value="">— Aucun —</option>'+p.map((x,i)=>`<option value="${i}">${x.name}</option>`).join('')}
-$('profSave').onclick=()=>{const name=prompt('Nom de ce profil (ex. « Salle des fêtes de X »)\u00a0:');if(!name)return;const p=loadProfiles();
+$('profSave').onclick=async()=>{const name=await ctsDialog({title:'Enregistrer ce profil',text:'Donne-lui un nom pour le retrouver facilement (ex. « Salle des fêtes de X »).',input:true,placeholder:'Nom du profil',ok:'Enregistrer'});if(!name)return;const p=loadProfiles();
 const data={name,salle:$('salle').value,proc:$('proc').value,brand:$('brand').value,model:$('model').value,mic:$('mic').value,calOn:$('micCalToggle').checked};
 const ex=p.findIndex(x=>x.name===name);if(ex>-1)p[ex]=data;else p.push(data);saveProfiles(p);renderProfSel();$('profSel').value=String(p.findIndex(x=>x.name===name))};
 $('profLoad').onclick=()=>{const i=$('profSel').value;if(i==='')return;const p=loadProfiles()[+i];if(!p)return;
 $('salle').value=p.salle;$('proc').value=p.proc;$('brand').value=p.brand;$('model').value=p.model;
 if(p.mic&&[...$('mic').options].some(o=>o.value===p.mic)){$('mic').value=p.mic;selectedMicId=p.mic}
 $('micCalToggle').checked=!!p.calOn;$('calbox').style.display=p.calOn?'block':'none';upd()};
-$('profDel').onclick=()=>{const i=$('profSel').value;if(i==='')return;if(!confirm('Supprimer ce profil ?'))return;const p=loadProfiles();p.splice(+i,1);saveProfiles(p);renderProfSel()};
+$('profDel').onclick=async()=>{const i=$('profSel').value;if(i==='')return;if(!(await ctsDialog({title:'Supprimer ce profil ?',text:'Cette action est définitive.',ok:'Supprimer',danger:true})))return;const p=loadProfiles();p.splice(+i,1);saveProfiles(p);renderProfSel()};
 renderProfSel();
 // --- Checklist avant concert ---
 const CHECKLIST=[
@@ -344,10 +449,42 @@ function saveChecklistState(c){try{localStorage.setItem('cts_checklist',JSON.str
 function renderChecklist(){const st=loadChecklist();
 $('checklistItems').innerHTML=CHECKLIST.map((t,i)=>`<label style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;${i?'border-top:1px solid var(--ln)':''}"><input type="checkbox" data-i="${i}" ${st[i]?'checked':''} style="width:auto;margin-top:3px">${t}</label>`).join('');
 $('checklistItems').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{const s=loadChecklist();s[cb.dataset.i]=cb.checked;saveChecklistState(s)})}
-$('checklistReset').onclick=()=>{if(confirm('Décocher toute la checklist ?')){saveChecklistState({});renderChecklist()}};
+$('checklistReset').onclick=async()=>{if(await ctsDialog({title:'Réinitialiser la checklist ?',text:'Toutes les cases seront décochées.',ok:'Réinitialiser'})){saveChecklistState({});renderChecklist()}};
 $('checklistClose').onclick=()=>show('s1');
 // --- Export PDF / impression ---
 $('exportBtn').onclick=()=>window.print();
+function wrapText(g,t,x,y,w,lh,maxLines){const words=t.split(/\s+/);let line='',n=0;for(const wd of words){const test=line?line+' '+wd:wd;if(g.measureText(test).width>w&&line){g.fillText(line,x,y);y+=lh;line=wd;if(++n>=maxLines)return y}else line=test}if(line){g.fillText(line,x,y);y+=lh}return y}
+async function shareImage(){if(!dev)return;
+const W=1080,Hh=1350,c=document.createElement('canvas');c.width=W;c.height=Hh;const g=c.getContext('2d');
+const st=getComputedStyle(document.documentElement),pv=n=>st.getPropertyValue(n).trim();
+const bg=pv('--bg'),fg=pv('--fg'),mut=pv('--mut'),card=pv('--card2'),ln=pv('--ln'),ok=pv('--ok'),bad=pv('--bad'),F="'Barlow Semi Condensed',system-ui,sans-serif";
+g.fillStyle=bg;g.fillRect(0,0,W,Hh);
+g.fillStyle=fg;g.font='700 72px '+F;g.textBaseline='alphabetic';g.fillText('CTS',64,112);
+g.fillStyle=mut;g.font='500 30px '+F;g.fillText('Cales Ta Sono · mesure RTA',64,158);
+const lieu=$('salle').selectedOptions[0].textContent,dt=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+g.textAlign='right';g.fillText(dt,W-64,112);g.fillText(occTxt($('occ').value)||'',W-64,158);g.textAlign='left';
+g.fillStyle=fg;g.font='700 36px '+F;g.fillText(lieu,64,236);
+const q=diagData(dev),col=q.cls==='bad'?bad:q.cls==='warn'?'#e0a100':ok;
+g.fillStyle=card;g.fillRect(64,270,W-128,170);g.strokeStyle=ln;g.lineWidth=2;g.strokeRect(64,270,W-128,170);
+g.fillStyle=fg;g.font='700 120px '+F;g.fillText(String(q.score),96,402);const nw=g.measureText(String(q.score)).width;
+g.fillStyle=mut;g.font='600 36px '+F;g.fillText('/100',96+nw+8,402);
+g.fillStyle=fg;g.font='700 38px '+F;g.fillText('Équilibre global',420,340);g.fillStyle=mut;g.font='500 30px '+F;g.fillText(q.msg,420,382);
+g.fillStyle=ln;g.fillRect(420,404,W-64-420-32,10);g.fillStyle=col;g.fillRect(420,404,(W-64-420-32)*q.score/100,10);
+const cw=(W-128-40)/3;q.cards.forEach((cd,i)=>{const x=64+i*(cw+20),y=468,cc=cd[2]==='bad'?bad:cd[2]==='warn'?'#e0a100':ok;
+g.fillStyle=card;g.fillRect(x,y,cw,150);g.fillStyle=cc;g.fillRect(x,y,cw,6);
+g.fillStyle=mut;g.font='700 24px '+F;g.fillText(cd[0].toUpperCase(),x+22,y+44);g.fillStyle=fg;g.font='700 52px '+F;g.fillText(fmtDb(cd[1])+' dB',x+22,y+98);g.fillStyle=cc;g.font='600 26px '+F;g.fillText(cd[3],x+22,y+132)});
+const tmp=document.createElement('canvas');tmp.width=960;tmp.height=460;tmp.style.cssText='position:fixed;left:-9999px;top:0;width:960px;height:460px';tmp._fs=1.5;document.body.appendChild(tmp);
+const cmpIdx=$('cmpSel').value,hh=loadHistory();
+tmp.id='cvExport';draw(dev,'cvExport',(cmpIdx!==''&&hh[+cmpIdx]&&hh[+cmpIdx].dev)?hh[+cmpIdx].dev:undefined);
+g.drawImage(tmp,60,652,960,460);g.strokeStyle=ln;g.strokeRect(60,652,960,460);tmp.remove();
+g.fillStyle=mut;g.font='700 24px '+F;g.fillText('À RETENIR',64,1156);g.fillStyle=fg;g.font='500 29px '+F;
+let y=1196;[...document.querySelectorAll('#adv .li')].slice(0,3).forEach(li=>{const t=li.textContent.replace(/^\s*(OK|À régler)\s*/,'');y=wrapText(g,'• '+t,64,y,W-128,38,2)+6});
+g.fillStyle=mut;g.font='500 24px '+F;g.fillText('Généré avec CTS · niston-49.github.io/CTS',64,Hh-36);
+c.toBlob(async blob=>{const file=new File([blob],'cts-mesure.png',{type:'image/png'});
+if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Mesure CTS'});return}catch(e){if(e&&e.name==='AbortError')return}}
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cts-mesure.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)},'image/png')}
+$('shareBtn').onclick=shareImage;
+
 // --- Assistant IA ---
 const CHAT_SYS="Tu es l'assistant intégré à CTS (Cales Ta Sono), une appli web qui aide des bénévoles d'association à régler une sonorisation sans ingénieur du son. L'utilisateur te parle depuis l'appli elle-même, en plein milieu de son usage : quand il dit « cette appli », « l'appli », « ici » ou équivalent, il parle toujours de CTS, jamais d'une autre application — ne renvoie jamais vers une appli concurrente pour faire ce que CTS fait déjà.\n"+
 "Pour que tu comprennes le contexte dans lequel tu interviens, voici comment CTS fonctionne concrètement : l'utilisateur choisit son lieu et son matériel, puis CTS fait jouer un bruit rose depuis les enceintes et écoute la salle via le microphone du téléphone (grâce au navigateur), pour tracer une courbe RTA par bandes de fréquence et proposer des corrections EQ. Il y a un mode Basique, un mode Expert (paramètres avancés), un mode Live pour surveiller la sono pendant l'événement, un historique des mesures, des profils de salle enregistrables, et une checklist avant concert — tout est accessible depuis le menu ☰ en haut à droite.\n"+
@@ -372,7 +509,7 @@ catch(e){chatHist.push({r:'a',t:"Assistant indisponible pour le moment (détail 
 saveChat(chatHist);renderChat();$('chatTyping').style.display='none';$('chatSend').disabled=false}
 $('chatSend').onclick=sendChat;
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
-$('chatClear').onclick=()=>{if(confirm('Effacer toute la conversation ?')){chatHist=[];saveChat(chatHist);renderChat()}};
+$('chatClear').onclick=async()=>{if(await ctsDialog({title:'Effacer la conversation ?',ok:'Effacer',danger:true})){chatHist=[];saveChat(chatHist);renderChat()}};
 $('chatClose').onclick=()=>show('s1');
 $('micCalToggle').onchange=e=>$('calbox').style.display=e.target.checked?'block':'none';
 $('calf').onchange=async e=>{const t=await e.target.files[0].text();const p=[];t.split(/\r?\n/).forEach(l=>{const m=l.trim().split(/[\s,;\t]+/).map(parseFloat);if(m.length>=2&&m[0]>0&&!isNaN(m[1]))p.push([m[0],m[1]])});cal=p.length>3?p:null};
@@ -381,31 +518,45 @@ $('go1').onclick=()=>show('s2');
 const V=(id,d)=>{const x=parseFloat($(id).value);return document.body.classList.contains('expert')&&!isNaN(x)?x:d};
 function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
 function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
-return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.ceil(c*1.122/r);i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
+return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.min(d.length-1,Math.ceil(c*1.122/r));i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const i0=B.indexOf(100),i1=B.indexOf(4000);const ref=l.slice(i0,i1+1).reduce((a,b)=>a+b,0)/(i1-i0+1);return l.map(v=>v-ref)}
 function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
 if(c.width!==w||c.height!==h){c.width=w;c.height=h}
 const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
 function chartColors(){if(CC)return CC;const s=getComputedStyle(document.documentElement),p=n=>s.getPropertyValue(n).trim();
-CC={bg:p('--chart-bg')||'#000',line:p('--chart-line')||'#fff',grid:p('--chart-grid')||'rgba(205,205,205,.3)',ref:p('--chart-ref')||'rgba(225,225,225,.5)',label:p('--chart-label')||'rgba(220,220,220,.65)',cmp:p('--chart-cmp')||'#2f86c7'};return CC}
-function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),col=chartColors();g.clearRect(0,0,W,H);
-g.fillStyle=col.bg;g.fillRect(0,0,W,H);
-const bw=W/B.length,mid=H/2,k=H/28;
-g.strokeStyle=col.grid;g.lineWidth=1;g.setLineDash([4,4]);
-[3,6].forEach(dBv=>{g.beginPath();g.moveTo(0,mid-dBv*k);g.lineTo(W,mid-dBv*k);g.stroke();g.beginPath();g.moveTo(0,mid+dBv*k);g.lineTo(W,mid+dBv*k);g.stroke()});
-g.setLineDash([]);
-g.strokeStyle=col.ref;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
-const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
-g.lineWidth=1.1;g.strokeStyle=col.line;g.lineJoin='miter';g.lineCap='butt';g.stroke();
-if(cmp){const cpts=cmp.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
-g.beginPath();g.moveTo(cpts[0][0],cpts[0][1]);for(let i=1;i<cpts.length;i++)g.lineTo(cpts[i][0],cpts[i][1]);
-g.setLineDash([6,4]);g.lineWidth=1.1;g.strokeStyle=col.cmp;g.stroke();g.setLineDash([])}
-g.fillStyle=col.label;g.font='12px sans-serif';g.textAlign='left';
+CC={grid2:p('--chart-grid2')||'rgba(255,255,255,.07)',bg:p('--chart-bg')||'#000',line:p('--chart-line')||'#fff',grid:p('--chart-grid')||'rgba(205,205,205,.3)',ref:p('--chart-ref')||'rgba(225,225,225,.5)',label:p('--chart-label')||'rgba(220,220,220,.65)',cmp:p('--chart-cmp')||'#2f86c7'};return CC}
+function fmtF(f){return f>=1000?(f/1000).toString().replace('.',',')+' kHz':String(f).replace('.',',')+' Hz'}
+function fmtDb(x,d){const v=Math.abs(x).toFixed(d==null?1:d).replace('.',',');return (x>0.04?'+':x<-0.04?'−':'')+v}
 const fmtHz=f=>f>=1000?((f/1000).toFixed(f%1000?1:0).replace(/\.0$/,''))+'k':String(f);
-const labelIdx=[0,5,10,15,20,25];
-labelIdx.forEach(i=>g.fillText(fmtHz(B[i]),i*bw+2,H-4));
-g.textAlign='right';g.fillText(fmtHz(B[30]),W-2,H-4);g.textAlign='left'}
+function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),col=chartColors(),fs=c._fs||1;c._args=[v,id,cmp];
+g.clearRect(0,0,W,H);g.fillStyle=col.bg;g.fillRect(0,0,W,H);
+const padL=Math.round(34*fs),padR=Math.round(10*fs),padT=Math.round(12*fs),padB=Math.round(22*fs),pw=W-padL-padR,ph=H-padT-padB,bw=pw/B.length,mid=padT+ph/2,k=ph/28;
+const X=i=>padL+i*bw+bw/2,Y=x=>mid-Math.max(-14,Math.min(14,x))*k;
+const FONT=`${Math.round(11*fs)}px 'Barlow Semi Condensed',system-ui,sans-serif`;g.font=FONT;
+const labelIdx=[0,5,10,15,20,25,30];
+g.strokeStyle=col.grid2;g.lineWidth=1;g.setLineDash([]);
+labelIdx.forEach(i=>{const x=Math.round(X(i))+.5;g.beginPath();g.moveTo(x,padT);g.lineTo(x,padT+ph);g.stroke()});
+g.strokeStyle=col.grid;g.setLineDash([4,4]);
+[3,6].forEach(q=>{[-1,1].forEach(sg=>{const y=Math.round(mid-sg*q*k)+.5;g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke()})});
+g.setLineDash([]);g.strokeStyle=col.ref;g.beginPath();g.moveTo(padL,Math.round(mid)+.5);g.lineTo(W-padR,Math.round(mid)+.5);g.stroke();
+g.fillStyle=col.label;g.textAlign='right';g.textBaseline='middle';
+[[6,'+6'],[3,'+3'],[0,'0 dB'],[-3,'−3'],[-6,'−6']].forEach(([q,t])=>g.fillText(t,padL-6,mid-q*k));
+g.textBaseline='alphabetic';g.textAlign='center';
+labelIdx.forEach(i=>g.fillText(fmtHz(B[i]),X(i),H-Math.round(6*fs)));
+const line=(arr,color,w,dash)=>{g.beginPath();arr.forEach((x,i)=>{const px=X(i),py=Y(x);i?g.lineTo(px,py):g.moveTo(px,py)});g.setLineDash(dash||[]);g.lineWidth=w;g.strokeStyle=color;g.lineJoin='miter';g.lineCap='butt';g.stroke();g.setLineDash([])};
+if(cmp)line(cmp,col.cmp,1.1*fs,[6,4]);
+line(v,col.line,1.2*fs);
+if(c._hx!=null){let idx=Math.round((c._hx-padL-bw/2)/bw);idx=Math.max(0,Math.min(B.length-1,idx));const hx=X(idx),hy=Y(v[idx]);
+g.strokeStyle=col.ref;g.lineWidth=1;g.beginPath();g.moveTo(Math.round(hx)+.5,padT);g.lineTo(Math.round(hx)+.5,padT+ph);g.stroke();
+g.fillStyle=col.line;g.beginPath();g.arc(hx,hy,3.4*fs,0,6.2832);g.fill();
+const txt=fmtF(B[idx])+'   '+fmtDb(v[idx])+' dB';g.font='700 '+FONT;g.textAlign='left';
+const tw=g.measureText(txt).width+18*fs,th=24*fs;let bx=hx+10*fs;if(bx+tw>W-4)bx=hx-10*fs-tw;const by=padT+4*fs;
+g.fillStyle=col.line;g.fillRect(bx,by,tw,th);g.fillStyle=col.bg;g.textBaseline='middle';g.fillText(txt,bx+9*fs,by+th/2+1);g.textBaseline='alphabetic'}
+g.textAlign='left'}
+function attachHover(c){if(!c||c._hov)return;c._hov=1;const redraw=()=>{if(c._args)draw(...c._args)};
+const set=e=>{c._hx=e.clientX-c.getBoundingClientRect().left;redraw()};
+c.addEventListener('pointermove',set);c.addEventListener('pointerdown',set);
+c.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){c._hx=null;redraw()}});c.addEventListener('pointercancel',()=>{c._hx=null;redraw()})}
 function drawMini(v,c){const {g,W,H}=fitCanvas(c),col=chartColors();g.clearRect(0,0,W,H);
 g.fillStyle=col.bg;g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
@@ -414,12 +565,19 @@ const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
 g.lineWidth=1;g.strokeStyle=col.line;g.lineJoin='miter';g.stroke()}
 let liveEmaDisp=null;
+let pkHold=-90,pkT=0;
+function updMeter(db,pdb){const pct=x=>Math.max(0,Math.min(1,(x+60)/60));$('meterCover').style.width=(100-pct(db)*100)+'%';
+const now=performance.now();if(pdb>=pkHold||now-pkT>1200){pkHold=pdb;pkT=now}$('meterPeak').style.left='calc('+(pct(pkHold)*100)+'% - 2px)';
+$('meterVal').textContent=db<-80?'— dB':fmtDb(db,0)+' dB';
+$('meterHint').textContent=!noise?'Lance le bruit rose pour commencer la mesure.':db<-55?'Signal faible : monte un peu le volume ou rapproche le micro.':db>-8?'Niveau très élevé : baisse un peu le volume.':'Bon niveau.'}
 function clipRatio(){const td=new Float32Array(an.fftSize);an.getFloatTimeDomainData(td);let c=0;for(let i=0;i<td.length;i++)if(Math.abs(td[i])>0.97)c++;return c/td.length}
 function ambientDbfs(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);let s=0,k=0;
 for(let i=1;i<d.length;i++){if(isFinite(d[i])){s+=Math.pow(10,d[i]/10);k++}}return k?10*Math.log10(s/k+1e-20):-100}
 function sampleAmbient(ms,step){return new Promise(res=>{const vals=[];const iv=setInterval(()=>{vals.push(ambientDbfs());if(vals.length*step>=ms){clearInterval(iv);res(vals.reduce((a,b)=>a+b,0)/vals.length)}},step)})}
+function setState(cls,t){const e=$('cvState');e.className='chartState '+cls;e.textContent=t}
 function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
-clipFrame++;if(clipFrame%6===0){const clipNow=clipRatio()>0.001;$('clipWarn').style.display=clipNow?'block':'none';if(clipNow&&mesuring)clipDuringMes=true}
+clipFrame++;if(clipFrame%3===0){const td=new Float32Array(an.fftSize);an.getFloatTimeDomainData(td);let pk=0,ss=0,cc=0;const n0=td.length-4096;for(let i=n0;i<td.length;i++){const a=Math.abs(td[i]);if(a>pk)pk=a;ss+=td[i]*td[i];if(a>0.97)cc++}
+updMeter(20*Math.log10(Math.sqrt(ss/4096)+1e-9),20*Math.log10(pk+1e-9));const clipNow=cc/4096>0.001;$('clipWarn').style.display=clipNow?'flex':'none';if(clipNow&&mesuring)clipDuringMes=true}
 const r=rel(l);if(!liveEmaDisp||liveEmaDisp.length!==r.length)liveEmaDisp=r.slice();else r.forEach((v,i)=>liveEmaDisp[i]=liveEmaDisp[i]*.82+v*.18);
 draw(liveEmaDisp);requestAnimationFrame(loop)}
 let selectedMicId='';
@@ -440,8 +598,8 @@ const constraints={echoCancellation:false,noiseSuppression:false,autoGainControl
 if(selectedMicId)constraints.deviceId={exact:selectedMicId};
 stream=await navigator.mediaDevices.getUserMedia({audio:constraints});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;src=ctx.createMediaStreamSource(stream);src.connect(an);
-liveEmaDisp=null;multiPoints=[];clipDuringMes=false;
-$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. Courbe blanche : réponse mesurée. Pointillés gris : zones de tolérance.';loop();
+liveEmaDisp=null;multiPoints=[];clipDuringMes=false;setState('live','En direct');
+$('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. La courbe montre l\'écart avec une réponse équilibrée ; les pointillés marquent ±3 et ±6 dB.';loop();
 setupOutputPicker()}
 catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
 async function setupOutputPicker(){
@@ -471,9 +629,9 @@ const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getC
 for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
 const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[len-xf+i]*(1-k)+s*k}
 noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').classList.add('on');$('bnoise').querySelector('.lbl').textContent='Arrêter le bruit rose'};
-$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
+$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;setState('rec','Mesure en cours');let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
 requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.style.width='100%'});
-lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
+lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;setState('live','En direct');lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
 if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}
 multiPoints.push(acc.map(v=>v/n));
 const multiOn=document.body.classList.contains('expert')&&$('multiToggle').checked;
@@ -546,7 +704,17 @@ box.innerHTML='<span class="lbl">Résumé</span><p>'+txt.replace(/</g,'&lt;')+'<
 function loadBias(){try{return JSON.parse(localStorage.getItem('cts_bias')||'{}')}catch(e){return{}}}
 function saveBias(b){try{localStorage.setItem('cts_bias',JSON.stringify(b))}catch(e){}}
 let lastCtx=null;
-function result(d){show('s3');$('clipResWarn').style.display=clipDuringMes?'block':'none';clipDuringMes=false;draw(d,'cvRes');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
+function diagData(d){const g=avg(d,B.indexOf(50),B.indexOf(100)),m=avg(d,B.indexOf(160),B.indexOf(2000)),m2=avg(d,B.indexOf(160),B.indexOf(315)),h=avg(d,B.indexOf(4000),B.length);
+const stt=(v,lo,hi)=>v>hi?['bad','Trop fort']:v<lo?['bad','Trop faible']:Math.abs(v)>2.5?['warn',v>0?'Un peu fort':'Un peu faible']:['ok','Équilibré'];
+const cards=[['Graves',g].concat(stt(g,-4,4)),['Médiums',m].concat(m2>4?['bad','Trop fort']:stt(m,-4,4)),['Aigus',h].concat(stt(h,-5,4))];
+const i0=B.indexOf(50),i1=B.indexOf(16000),ma=d.slice(i0,i1+1).reduce((x,y)=>x+Math.abs(y),0)/(i1-i0+1);
+const score=Math.max(0,Math.min(100,Math.round(100-ma*8)));
+const cls=score>=75?'':score>=50?'warn':'bad',msg=score>=85?'Très bon équilibre':score>=65?'Bon équilibre, quelques ajustements possibles':score>=40?'Des écarts à corriger':'Gros écarts à corriger';
+return{cards,score,cls,msg}}
+function diagHtml(d){const q=diagData(d);
+return `<div class="score ${q.cls}"><div class="scoreNum">${q.score}<small>/100</small></div><div class="scoreInfo"><b>Équilibre global</b><span>${q.msg}</span><div class="scoreBar"><i style="width:${q.score}%"></i></div></div></div><div class="bandCards">${q.cards.map(c=>`<div class="bc ${c[2]}"><span class="bcTitle">${c[0]}</span><span class="bcVal">${fmtDb(c[1])} dB</span><span class="bcSt">${c[3]}</span></div>`).join('')}</div>`}
+
+function result(d){show('s3');$('diag').innerHTML=diagHtml(d);$('clipResWarn').style.display=clipDuringMes?'flex':'none';clipDuringMes=false;draw(d,'cvRes');advice(d);aiSummary(d);const E=document.body.classList.contains('expert');$('dt').open=E;const max=Math.round(V('nf',+$('proc').value));const c=[];
 const bias=loadBias(),lieuKey=$('salle').value,bAdj=(bias[lieuKey]&&bias[lieuKey].thrAdj)||0;
 const thr=V('thr',3)+bAdj,mc=V('mcut',6),qq=V('qv',0);
 $('bands').innerHTML='<tr><th>Fréq.</th><th>Écart</th></tr>'+d.map((x,i)=>`<tr><td>${B[i]} Hz</td><td>${x>0?'+':''}${x.toFixed(1)} dB</td></tr>`).join('');
@@ -561,7 +729,7 @@ if(pr&&pr.geq&&c.length)h+=ti('Ou égaliseur graphique 31 bandes')+[...c].sort((
 h+=nt('On coupe les pics, on ne comble pas les creux : un creux vient souvent de la salle ou de la position du micro.');$('peq').innerHTML=h;
 lastCtx={lieuKey,thrUsed:thr};
 const lieuTxt=$('salle').selectedOptions[0].textContent,appTxt=($('brand').value+' '+$('model').value).trim();
-saveHistory({ts:Date.now(),lieu:lieuTxt,appareil:appTxt,advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML,dev:d.slice()});
+saveHistory({ts:Date.now(),lieu:lieuTxt,occ:$('occ').value,appareil:appTxt,diagHtml:diagHtml(d),advHtml:$('adv').innerHTML,peqHtml:$('peq').innerHTML,dev:d.slice()});
 lastMeasure={lieu:lieuTxt,appareil:appTxt,dev:d.slice()};try{localStorage.setItem('cts_lastmeasure',JSON.stringify(lastMeasure))}catch(e){}
 renderCmpSel();
 sendMeasureData(lieuTxt,appTxt,d);
@@ -571,10 +739,17 @@ if(AI_WORKER_URL.includes('VOTRE-WORKER'))return;
 const mode=document.body.classList.contains('expert')?'Expert':'Basique';
 fetch(AI_WORKER_URL.replace(/\/$/,'')+'/measure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lieu,appareil,mode,bands:d})})
 .then(r=>r.json()).then(j=>{if(j&&j.id)lastMeasureId=j.id}).catch(()=>{})}
+function occTxt(o){return o==='public'?'Avec public':o==='vide'?'Salle vide':''}
 function renderCmpSel(){const h=loadHistory(),sel=$('cmpSel');
-sel.innerHTML='<option value="">— Aucune —</option>'+h.slice(1).map((r,i)=>{if(!r.dev)return'';const d2=new Date(r.ts);return `<option value="${i+1}">${d2.toLocaleDateString('fr-FR')} ${d2.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} — ${r.lieu}</option>`}).join('')}
-$('cmpSel').onchange=()=>{const i=$('cmpSel').value,h=loadHistory();if(i===''||!h[+i]||!h[+i].dev){draw(dev,'cvRes');return}draw(dev,'cvRes',h[+i].dev)};
-function renderFeedback(){$('fb').innerHTML='<p><strong>Ce résultat te convient ?</strong></p><div class="row"><button id="fbUp">👍 Oui</button><button id="fbDown" class="sec">👎 Pas vraiment</button></div>';
+sel.innerHTML='<option value="">— Aucune —</option>'+h.slice(1).map((r,i)=>{if(!r.dev)return'';const d2=new Date(r.ts);return `<option value="${i+1}">${d2.toLocaleDateString('fr-FR')} ${d2.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} — ${r.lieu}${r.occ?' · '+occTxt(r.occ):''}</option>`}).join('');$('cmpNote').textContent=''}
+$('cmpSel').onchange=()=>{const i=$('cmpSel').value,h=loadHistory();
+if(i===''||!h[+i]||!h[+i].dev){draw(dev,'cvRes');$('cmpNote').textContent='';return}
+const o=h[+i].dev;draw(dev,'cvRes',o);
+const dg=avg(dev,B.indexOf(50),B.indexOf(100))-avg(o,B.indexOf(50),B.indexOf(100)),dh=avg(dev,B.indexOf(4000),B.length)-avg(o,B.indexOf(4000),B.length);
+let t='Ligne pointillée = mesure choisie. Par rapport à elle : graves '+fmtDb(dg)+' dB, aigus '+fmtDb(dh)+' dB.';
+if(h[0]&&h[0].occ&&h[+i].occ&&h[0].occ!==h[+i].occ)t+=' Normal : un public absorbe surtout les aigus.';
+$('cmpNote').textContent=t};
+function renderFeedback(){$('fb').innerHTML='<p><strong>Ce résultat te convient ?</strong></p><div class="row"><button id="fbUp"><svg class="ic"><use href="#i-up"/></svg>Oui</button><button id="fbDown" class="sec"><svg class="ic"><use href="#i-down"/></svg>Pas vraiment</button></div>';
 $('fbUp').onclick=()=>sendFeedback(true);$('fbDown').onclick=()=>{$('fb').innerHTML+='<textarea id="fbTxt" placeholder="Qu\'est-ce qui ne va pas ? (facultatif)"></textarea><button id="fbSend">Envoyer</button>';$('fbSend').onclick=()=>sendFeedback(false,$('fbTxt').value)}}
 function sendFeedback(ok,comment){if(!lastCtx)return;const bias=loadBias(),k=lastCtx.lieuKey;bias[k]=bias[k]||{thrAdj:0};
 if(!ok)bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj+0.5));else bias[k].thrAdj=Math.max(-1.5,Math.min(3,bias[k].thrAdj-0.15));
@@ -627,6 +802,9 @@ $('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');refreshMicList()
 (function boot(){
 if(localStorage.getItem('cts_seenintro')){refreshMicList();show('s1')}else{show('sWelcome')}
 })();
+document.querySelectorAll('.stepper').forEach(el=>{const n=+el.dataset.n,names=['Installation','Mesure','Résultat'];
+el.innerHTML=names.map((t,i)=>{const k=i+1,c=k<n?'done':k===n?'on':'';return (i?`<div class="bar ${k<=n?'done':''}"></div>`:'')+`<div class="st ${c}"><i>${k<n?'✓':k}</i><span>${t}</span></div>`}).join('')});
+['cv','cvRes','cvLive'].forEach(id=>attachHover($(id)));
 let resizeTO=null;
 window.addEventListener('resize',()=>{clearTimeout(resizeTO);resizeTO=setTimeout(()=>{
 if(!$('s3').classList.contains('off')&&dev){const ci=$('cmpSel').value,h=loadHistory();draw(dev,'cvRes',(ci!==''&&h[+ci]&&h[+ci].dev)?h[+ci].dev:null)}
