@@ -404,7 +404,7 @@ menuBtn.onclick=e=>{e.stopPropagation();const willOpen=menuDrop.classList.contai
 document.addEventListener('click',e=>{if(!menuDrop.contains(e.target)&&e.target!==menuBtn)closeMenu()});
 $('mHome').onclick=()=>{closeMenu();leaveCurrent();show('sWelcome')};
 $('mNew').onclick=()=>{closeMenu();leaveCurrent();refreshMicList();show('s1')};
-$('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');renderHistory();show('sHist')};
+$('mHist').onclick=()=>{closeMenu();leaveCurrent();$('histDetail').classList.add('off');$('histDetail').innerHTML='';$('histList').classList.remove('off');show('sHist');renderHistory()};
 $('mChat').onclick=()=>{closeMenu();leaveCurrent();renderChat();show('sChat')};
 $('mChecklist').onclick=()=>{closeMenu();leaveCurrent();renderChecklist();show('sChecklist')};
 $('mCgu').onclick=()=>{closeMenu();leaveCurrent();show('sCGU')};
@@ -517,10 +517,11 @@ function calAt(f){if(!cal)return 0;let b=cal[0];for(const p of cal)if(Math.abs(M
 $('go1').onclick=()=>show('s2');
 const V=(id,d)=>{const x=parseFloat($(id).value);return document.body.classList.contains('expert')&&!isNaN(x)?x:d};
 function tgt(c){return c>4000?V('slope',-1.5)*Math.log2(c/4000):0}
-function levels(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
+let FD=null,TD=null;
+function levels(){if(!FD||FD.length!==an.frequencyBinCount)FD=new Float32Array(an.frequencyBinCount);const d=FD;an.getFloatFrequencyData(d);const r=ctx.sampleRate/an.fftSize;
 return B.map(c=>{let s=0;for(let i=Math.max(1,Math.floor(c/1.122/r));i<=Math.min(d.length-1,Math.ceil(c*1.122/r));i++)s+=Math.pow(10,d[i]/10);return 10*Math.log10(s+1e-20)-calAt(c)-tgt(c)})}
 function rel(l){const i0=B.indexOf(100),i1=B.indexOf(4000);const ref=l.slice(i0,i1+1).reduce((a,b)=>a+b,0)/(i1-i0+1);return l.map(v=>v-ref)}
-function fitCanvas(c){const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth||c.width),ch=Math.round(c.clientHeight||c.height),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
+function fitCanvas(c){const cw=Math.round(c.clientWidth),ch=Math.round(c.clientHeight);if(!cw||!ch)return null;const dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(1,Math.round(cw*dpr)),h=Math.max(1,Math.round(ch*dpr));
 if(c.width!==w||c.height!==h){c.width=w;c.height=h}
 const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,W:cw,H:ch}}
 function chartColors(){if(CC)return CC;const s=getComputedStyle(document.documentElement),p=n=>s.getPropertyValue(n).trim();
@@ -528,7 +529,7 @@ CC={grid2:p('--chart-grid2')||'rgba(255,255,255,.07)',bg:p('--chart-bg')||'#000'
 function fmtF(f){return f>=1000?(f/1000).toString().replace('.',',')+' kHz':String(f).replace('.',',')+' Hz'}
 function fmtDb(x,d){const v=Math.abs(x).toFixed(d==null?1:d).replace('.',',');return (x>0.04?'+':x<-0.04?'−':'')+v}
 const fmtHz=f=>f>=1000?((f/1000).toFixed(f%1000?1:0).replace(/\.0$/,''))+'k':String(f);
-function draw(v,id,cmp){const c=$(id||'cv'),{g,W,H}=fitCanvas(c),col=chartColors(),fs=c._fs||1;c._args=[v,id,cmp];
+function draw(v,id,cmp){const c=$(id||'cv'),fc=fitCanvas(c);if(!fc)return;const {g,W,H}=fc,col=chartColors(),fs=c._fs||1;c._args=[v,id,cmp];
 g.clearRect(0,0,W,H);g.fillStyle=col.bg;g.fillRect(0,0,W,H);
 const padL=Math.round(34*fs),padR=Math.round(10*fs),padT=Math.round(12*fs),padB=Math.round(22*fs),pw=W-padL-padR,ph=H-padT-padB,bw=pw/B.length,mid=padT+ph/2,k=ph/28;
 const X=i=>padL+i*bw+bw/2,Y=x=>mid-Math.max(-14,Math.min(14,x))*k;
@@ -557,7 +558,7 @@ function attachHover(c){if(!c||c._hov)return;c._hov=1;const redraw=()=>{if(c._ar
 const set=e=>{c._hx=e.clientX-c.getBoundingClientRect().left;redraw()};
 c.addEventListener('pointermove',set);c.addEventListener('pointerdown',set);
 c.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){c._hx=null;redraw()}});c.addEventListener('pointercancel',()=>{c._hx=null;redraw()})}
-function drawMini(v,c){const {g,W,H}=fitCanvas(c),col=chartColors();g.clearRect(0,0,W,H);
+function drawMini(v,c){const fc=fitCanvas(c);if(!fc)return;const {g,W,H}=fc,col=chartColors();g.clearRect(0,0,W,H);
 g.fillStyle=col.bg;g.fillRect(0,0,W,H);
 const bw=W/v.length,mid=H/2,k=H/28;
 g.strokeStyle=col.ref;g.lineWidth=1;g.beginPath();g.moveTo(0,mid);g.lineTo(W,mid);g.stroke();
@@ -575,8 +576,10 @@ function ambientDbfs(){const d=new Float32Array(an.frequencyBinCount);an.getFloa
 for(let i=1;i<d.length;i++){if(isFinite(d[i])){s+=Math.pow(10,d[i]/10);k++}}return k?10*Math.log10(s/k+1e-20):-100}
 function sampleAmbient(ms,step){return new Promise(res=>{const vals=[];const iv=setInterval(()=>{vals.push(ambientDbfs());if(vals.length*step>=ms){clearInterval(iv);res(vals.reduce((a,b)=>a+b,0)/vals.length)}},step)})}
 function setState(cls,t){const e=$('cvState');e.className='chartState '+cls;e.textContent=t}
-function loop(){if(!an)return;const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
-clipFrame++;if(clipFrame%3===0){const td=new Float32Array(an.fftSize);an.getFloatTimeDomainData(td);let pk=0,ss=0,cc=0;const n0=td.length-4096;for(let i=n0;i<td.length;i++){const a=Math.abs(td[i]);if(a>pk)pk=a;ss+=td[i]*td[i];if(a>0.97)cc++}
+function loop(){if(!an)return;
+if($('s2').classList.contains('off')&&!mesuring){setTimeout(loop,250);return}
+const l=levels();if(mesuring){if(!acc)acc=l.map(()=>0);l.forEach((v,i)=>acc[i]+=Math.pow(10,v/10));n++}
+clipFrame++;if(clipFrame%3===0){if(!TD||TD.length!==an.fftSize)TD=new Float32Array(an.fftSize);const td=TD;an.getFloatTimeDomainData(td);let pk=0,ss=0,cc=0;const n0=td.length-4096;for(let i=n0;i<td.length;i++){const a=Math.abs(td[i]);if(a>pk)pk=a;ss+=td[i]*td[i];if(a>0.97)cc++}
 updMeter(20*Math.log10(Math.sqrt(ss/4096)+1e-9),20*Math.log10(pk+1e-9));const clipNow=cc/4096>0.001;$('clipWarn').style.display=clipNow?'flex':'none';if(clipNow&&mesuring)clipDuringMes=true}
 const r=rel(l);if(!liveEmaDisp||liveEmaDisp.length!==r.length)liveEmaDisp=r.slice();else r.forEach((v,i)=>liveEmaDisp[i]=liveEmaDisp[i]*.82+v*.18);
 draw(liveEmaDisp);requestAnimationFrame(loop)}
