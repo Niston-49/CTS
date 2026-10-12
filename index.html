@@ -130,7 +130,7 @@ button.danger{background:var(--bad)}
 /* hiérarchie des actions de l'étape mesure : une seule action principale à la fois */
 #bnoise,#bmes{background:transparent;border:2px solid var(--ln);color:var(--fg)}
 #bnoise:disabled,#bmes:disabled{color:var(--mut);opacity:.55}
-#bnoise:not(:disabled):not(.on),#bnoise.on~#bmes:not(:disabled):not(.on){background:var(--ac);border-color:var(--ac);color:#f3ead9}
+#bnoise:not(:disabled):not(.on),#bmes.ready:not(:disabled):not(.on){background:var(--ac);border-color:var(--ac);color:#f3ead9}
 #bnoise.on,#bmes.on{background:var(--ok);border-color:var(--ok);color:#f3ead9}
 /* indicateur d'étapes */
 .stepper{display:flex;align-items:center;gap:10px;margin:0 0 16px}
@@ -186,7 +186,7 @@ html[data-theme="light"] .chartCard canvas{border:0}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}}
 section:not(.off){animation:fadeUp .28s ease}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-#st{margin-top:12px}@media (max-width:1023px){.tagline{display:none}}
+#st{margin-top:12px}body.onWelcome .seg{display:none}.dlRow{display:flex;gap:8px;margin-top:12px}.dlRow button{margin-top:0;flex:1}.dlRow select{width:auto;flex:none;margin:0}.dlHint{margin:8px 0 0;font-size:14px}@media (max-width:1023px){.tagline{display:none}}
 @media (min-width:720px){
 .stepper .st:not(.on) span{display:inline}
 .modal{align-items:center}.modal .box{border-radius:16px;max-width:460px;padding:24px}
@@ -200,7 +200,7 @@ section:not(.off){animation:fadeUp .28s ease}
 }
 @media print{#shareBtn{display:none!important}}
 </style></head><body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol><symbol id="i-speaker" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol><symbol id="i-bars" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol><symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol><symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></symbol><symbol id="i-wave" viewBox="0 0 24 24"><polyline points="2 12 5 12 7 5 10 19 13 8 16 15 18 12 22 12"/></symbol><symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol><symbol id="i-speaker" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol><symbol id="i-bars" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol><symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol><symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol><symbol id="i-wave" viewBox="0 0 24 24"><polyline points="2 12 5 12 7 5 10 19 13 8 16 15 18 12 22 12"/></symbol><symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol></svg>
 <div class="appShell">
 <div class="sidebar">
 <header>
@@ -220,7 +220,7 @@ section:not(.off){animation:fadeUp .28s ease}
 </div>
 </div>
 </header>
-<div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button></div>
+<div class="seg" role="group" aria-label="Mode"><button id="mB" class="on" aria-pressed="true">Basique</button><button id="mE" aria-pressed="false">Expert</button><button id="mL" aria-pressed="false"><svg class="ic"><use href="#i-radio"/></svg>Live</button></div>
 </div>
 <div class="main">
 
@@ -262,7 +262,7 @@ section:not(.off){animation:fadeUp .28s ease}
 <button id="go1">Continuer</button></section>
 
 <section id="s2" class="off"><div class="stepper" data-n="2"></div><h2>Mesure</h2>
-<p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis lance le bruit rose. Pas de musique, silence dans la salle.</p>
+<p>Place le micro là où le public écoute, à hauteur d'oreille. Baisse le volume de la sono à un niveau modéré, puis diffuse le bruit rose : depuis l'appli, ou depuis le fichier à télécharger si tu préfères le jouer sur autre chose. Lance ensuite l'analyse. Pas de musique, silence dans la salle.</p>
 <div class="chartCard"><div class="chartHead"><span>RTA<small>1/3 d'octave</small></span><span class="chartState" id="cvState">Micro inactif</span></div><canvas id="cv" width="560" height="220"></canvas></div>
 <div class="meterRow"><span>Niveau</span><div class="meter"><div class="meterCover" id="meterCover"></div><div class="meterPeak" id="meterPeak"></div></div><span class="meterVal" id="meterVal">— dB</span></div>
 <p id="meterHint" class="mut"></p>
@@ -274,6 +274,8 @@ section:not(.off){animation:fadeUp .28s ease}
 <button id="bmic"><svg class="ic"><use href="#i-mic"/></svg><span class="lbl">Activer le micro</span></button>
 <div id="outWrap" style="display:none"><label for="outSel">Sortie audio du bruit rose</label><select id="outSel"></select></div>
 <button id="bnoise" disabled><svg class="ic"><use href="#i-speaker"/></svg><span class="lbl">Lancer le bruit rose</span></button>
+<div class="dlRow"><button id="bdl" class="sec"><svg class="ic"><use href="#i-download"/></svg><span class="lbl">Télécharger le bruit rose</span></button><select id="dlDur" aria-label="Durée du fichier"><option value="60">1 min</option><option value="300">5 min</option></select></div>
+<p class="mut dlHint">Fichier WAV (44,1 kHz, 16 bits, niveau de référence ≈ −20 dBFS), à diffuser depuis une clé USB, un lecteur ou ton logiciel DJ. Une fois le son lancé, tu peux directement appuyer sur « Analyser ».</p>
 <button id="bmes" disabled><svg class="ic"><use href="#i-bars"/></svg><span class="lbl">Analyser</span><span class="prog" id="bmesProg"></span></button>
 <p id="st" class="mut"></p></section>
 
@@ -295,7 +297,6 @@ section:not(.off){animation:fadeUp .28s ease}
 <div id="fb"></div>
 <button id="shareBtn" class="sec"><svg class="ic"><use href="#i-share"/></svg>Partager en image</button>
 <button id="exportBtn" class="sec"><svg class="ic"><use href="#i-printer"/></svg>Imprimer / Exporter en PDF</button>
-<button id="goLive" class="sec"><svg class="ic"><use href="#i-radio"/></svg>Passer en mode Live (pendant la soirée)</button>
 <button id="again" class="sec"><svg class="ic"><use href="#i-repeat"/></svg>Refaire une mesure</button>
 </div></div></section>
 
@@ -342,7 +343,7 @@ section:not(.off){animation:fadeUp .28s ease}
 <section id="sCGU" class="off"><h2>Conditions générales d'utilisation</h2>
 <p class="mut">Dernière mise à jour : octobre 2026</p>
 <p><strong>CTS (Cales Ta Sono)</strong> est un outil gratuit, proposé à titre indicatif, pour aider à régler une sonorisation sans ingénieur du son. Il ne remplace pas l'expertise d'un professionnel.</p>
-<p>Les mesures et conseils fournis sont approximatifs et dépendent de la qualité du micro, du lieu et des réglages. CTS et son auteur déclinent toute responsabilité en cas de dommage matériel (enceintes, amplis) lié à l'utilisation de l'outil : vérifie toujours tes niveaux avant d'augmenter un réglage.</p>
+<p>Les mesures et conseils fournis sont approximatifs et dépendent de la qualité du micro, du lieu et des réglages. CTS et son auteur déclinent toute responsabilité en cas de dommage matériel lié à l'utilisation de l'outil : vérifie toujours tes niveaux avant d'augmenter un réglage.</p>
 <p>L'accès au micro sert uniquement à l'analyse en direct, dans ton navigateur. Aucun enregistrement audio n'est envoyé ni conservé.</p>
 <p>Tes réglages, ton historique d'analyses et tes préférences sont stockés uniquement sur ton appareil (stockage local du navigateur).</p>
 <p>À chaque mesure terminée, les écarts par bande de fréquence mesurés (le résultat de l'analyse acoustique), le type de lieu et le matériel renseigné sont envoyés de façon anonyme à un serveur, pour suivre dans le temps la fiabilité des conseils et les améliorer. Ces données ne contiennent ni nom, ni email, ni aucune information permettant de t'identifier. Si tu donnes un retour (pouce levé ou baissé, et commentaire), il est rattaché à cette mesure, toujours de façon anonyme.</p>
@@ -360,7 +361,7 @@ let lastMeasure=null;try{lastMeasure=JSON.parse(localStorage.getItem('cts_lastme
 let lastMeasureId=null;
 let CC=null,multiPoints=[],clipDuringMes=false,clipFrame=0;
 let liveOn=false,liveBase=null,liveEma=null,liveTimer=null,alertSince={},alertLast={};
-const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sSettings','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id))};
+const $=id=>document.getElementById(id),show=id=>{['sWelcome','s1','s2','s3','s4','sHist','sChat','sChecklist','sSettings','sCGU'].forEach(s=>$(s).classList.toggle('off',s!==id));document.body.classList.toggle('onWelcome',id==='sWelcome');if(typeof syncSeg==='function')syncSeg()};
 let mesInterval=null;
 function leaveCurrent(){
 if(liveOn){liveOn=false;clearInterval(liveTimer);wakeLockStop()}
@@ -370,11 +371,11 @@ if(noise){try{noise.stop()}catch(e){}noise=null;$('bnoise').classList.remove('on
 
 function ctsDialog(o){return new Promise(res=>{
 const m=document.createElement('div');m.className='modal';
-m.innerHTML=`<div class="box" role="dialog" aria-modal="true"><h2 style="margin-top:0">${o.title}</h2>${o.text?`<p class="mut">${o.text}</p>`:''}${o.input?`<input type="text" id="dlgInput" placeholder="${o.placeholder||''}" autocomplete="off">`:''}<button id="dlgOk"${o.danger?' class="danger"':''}>${o.ok||'OK'}</button><button id="dlgCancel" class="sec">${o.cancel||'Annuler'}</button></div>`;
+m.innerHTML=`<div class="box" role="dialog" aria-modal="true"><h2 style="margin-top:0">${o.title}</h2>${o.text?`<p class="mut">${o.text}</p>`:''}${o.input?`<input type="text" id="dlgInput" placeholder="${o.placeholder||''}" autocomplete="off">`:''}<button id="dlgOk"${o.danger?' class="danger"':''}>${o.ok||'OK'}</button>${o.cancel===false?'':`<button id="dlgCancel" class="sec">${o.cancel||'Annuler'}</button>`}</div>`;
 document.body.appendChild(m);const inp=m.querySelector('#dlgInput');if(inp)setTimeout(()=>inp.focus(),30);
 const close=v=>{m.remove();res(v)};
 m.querySelector('#dlgOk').onclick=()=>close(o.input?inp.value.trim():true);
-m.querySelector('#dlgCancel').onclick=()=>close(o.input?null:false);
+const dc=m.querySelector('#dlgCancel');if(dc)dc.onclick=()=>close(o.input?null:false);
 m.addEventListener('click',e=>{if(e.target===m)close(o.input?null:false)});
 if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')close(inp.value.trim());if(e.key==='Escape')close(null)})})}
 function loadHistory(){try{return JSON.parse(localStorage.getItem('cts_history')||'[]')}catch(e){return[]}}
@@ -566,11 +567,12 @@ const pts=v.map((x,i)=>[i*bw+bw/2,mid-Math.max(-14,Math.min(14,x))*k]);
 g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);
 g.lineWidth=1;g.strokeStyle=col.line;g.lineJoin='miter';g.stroke()}
 let liveEmaDisp=null;
-let pkHold=-90,pkT=0;
+let pkHold=-90,pkT=0,lastDb=-100;
 function updMeter(db,pdb){const pct=x=>Math.max(0,Math.min(1,(x+60)/60));$('meterCover').style.width=(100-pct(db)*100)+'%';
 const now=performance.now();if(pdb>=pkHold||now-pkT>1200){pkHold=pdb;pkT=now}$('meterPeak').style.left='calc('+(pct(pkHold)*100)+'% - 2px)';
 $('meterVal').textContent=db<-80?'— dB':fmtDb(db,0)+' dB';
-$('meterHint').textContent=!noise?'Lance le bruit rose pour commencer la mesure.':db<-55?'Signal faible : monte un peu le volume ou rapproche le micro.':db>-8?'Niveau très élevé : baisse un peu le volume.':'Bon niveau.'}
+lastDb=db;$('bmes').classList.toggle('ready',!!(noise||db>-50));
+$('meterHint').textContent=db<-55?(noise?'Signal faible : monte un peu le volume ou rapproche le micro.':'Lance le bruit rose dans l\'appli, ou diffuse le fichier téléchargé sur ta sono.'):db>-8?'Niveau très élevé : baisse un peu le volume.':(noise?'Bon niveau.':'Son détecté, bon niveau : tu peux lancer l\'analyse.')}
 function clipRatio(){const td=new Float32Array(an.fftSize);an.getFloatTimeDomainData(td);let c=0;for(let i=0;i<td.length;i++)if(Math.abs(td[i])>0.97)c++;return c/td.length}
 function ambientDbfs(){const d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);let s=0,k=0;
 for(let i=1;i<d.length;i++){if(isFinite(d[i])){s+=Math.pow(10,d[i]/10);k++}}return k?10*Math.log10(s/k+1e-20):-100}
@@ -596,15 +598,16 @@ if(prev&&ins.some(d=>d.deviceId===prev))sel.value=prev;selectedMicId=sel.value;
 $('micNote').textContent=ins.length>1?'Plusieurs micros détectés (interne, Bluetooth, USB…) : choisis celui que tu utilises.':'';
 }catch(e){sel.innerHTML='<option value="">Micro du téléphone / de l\'ordinateur (par défaut)</option>';$('micNote').textContent="Autorise l'accès au micro pour voir la liste si tu as un micro externe branché.";}}
 $('mic').onchange=()=>{selectedMicId=$('mic').value};
-$('bmic').onclick=async()=>{try{
+async function startMic(){if(an)return true;try{
 const constraints={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
 if(selectedMicId)constraints.deviceId={exact:selectedMicId};
 stream=await navigator.mediaDevices.getUserMedia({audio:constraints});
 ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=.8;src=ctx.createMediaStreamSource(stream);src.connect(an);
 liveEmaDisp=null;multiPoints=[];clipDuringMes=false;setState('live','En direct');
 $('bmic').disabled=true;$('bmic').classList.add('on');$('bmic').querySelector('.lbl').textContent='Micro activé ✓';$('bnoise').disabled=false;$('bmes').disabled=false;$('st').textContent='Micro actif. La courbe montre l\'écart avec une réponse équilibrée ; les pointillés marquent ±3 et ±6 dB.';loop();
-setupOutputPicker()}
-catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).'}};
+setupOutputPicker();return true}
+catch(e){$('st').textContent='Micro inaccessible. Autorise-le dans le navigateur, ou ouvre la page dans Chrome ou Safari (pas dans une fenêtre intégrée).';return false}}
+$('bmic').onclick=startMic;
 async function setupOutputPicker(){
 if(!(ctx&&'setSinkId' in ctx))return;
 try{const devs=await navigator.mediaDevices.enumerateDevices();const outs=devs.filter(d=>d.kind==='audiooutput');
@@ -627,12 +630,36 @@ $('bnoise').onclick=async()=>{if(noise){noise.stop();noise=null;$('bnoise').clas
 $('bnoise').disabled=true;const amb=await sampleAmbient(400,80);$('bnoise').disabled=false;
 if(amb>-28){const go=await ambientWarningModal();if(!go)return}
 startNoise()};
+
+// --- Bruit rose à télécharger (WAV 44,1 kHz, 16 bits, mono, ≈ -20 dBFS RMS) ---
+const pinkCache={};
+function makePinkWav(sec){const sr=44100,len=sr*sec,warm=4000;
+const mk=()=>{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0,hx=0,hy=0;const a=Math.exp(-2*Math.PI*7/sr);
+return()=>{const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;
+const v=b0+b1+b2+b3+b4+b5+b6+w*.5362;b6=w*.115926;const y=a*(hy+v-hx);hx=v;hy=y;return y}};
+let g=mk(),ss=0;for(let i=0;i<warm;i++)g();const nEst=sr*10;for(let i=0;i<nEst;i++){const v=g();ss+=v*v}
+const gain=0.1/Math.sqrt(ss/nEst);
+const buf=new ArrayBuffer(44+len*2),dv=new DataView(buf),str=(o,t)=>{for(let i=0;i<t.length;i++)dv.setUint8(o+i,t.charCodeAt(i))};
+str(0,'RIFF');dv.setUint32(4,36+len*2,true);str(8,'WAVE');str(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);str(36,'data');dv.setUint32(40,len*2,true);
+const pcm=new Int16Array(buf,44,len);g=mk();for(let i=0;i<warm;i++)g();
+for(let i=0;i<len;i++){const v=Math.max(-.98,Math.min(.98,g()*gain));pcm[i]=Math.round(v*32767)}
+const xf=4410;for(let i=0;i<xf;i++){const k=i/xf;pcm[i]=Math.round(pcm[len-xf+i]*(1-k)+pcm[i]*k)}
+return new Blob([buf],{type:'audio/wav'})}
+$('bdl').onclick=async()=>{const sec=+$('dlDur').value,lbl=$('bdl').querySelector('.lbl'),old=lbl.textContent;
+$('bdl').disabled=true;lbl.textContent='Génération du fichier…';await new Promise(r=>setTimeout(r,40));
+try{const blob=pinkCache[sec]||(pinkCache[sec]=makePinkWav(sec));const name='bruit-rose-CTS-'+(sec>=60?(sec/60)+'min':sec+'s')+'.wav';
+let done=false;
+if(window.matchMedia&&matchMedia('(pointer:coarse)').matches&&navigator.canShare){const file=new File([blob],name,{type:'audio/wav'});
+if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Bruit rose CTS'});done=true}catch(e){if(e&&e.name==='AbortError')done=true}}}
+if(!done){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000)}
+}catch(e){ctsDialog({title:'Téléchargement impossible',text:'Le fichier n\'a pas pu être généré sur cet appareil.',ok:'OK',cancel:false})}
+lbl.textContent=old;$('bdl').disabled=false};
 function startNoise(){
 const len=ctx.sampleRate*6,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
 for(let i=0;i<len;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=Math.max(-1,Math.min(1,(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11));b6=w*.115926}
 const xf=Math.min(2000,len>>2);for(let i=0;i<xf;i++){const k=i/xf,s=d[i];d[i]=d[len-xf+i]*(1-k)+s*k}
 noise=ctx.createBufferSource();noise.buffer=buf;noise.loop=true;const ng=ctx.createGain();ng.gain.value=.45;noise.connect(ng).connect(ctx.destination);noise.start();$('bnoise').classList.add('on');$('bnoise').querySelector('.lbl').textContent='Arrêter le bruit rose'};
-$('bmes').onclick=()=>{acc=null;n=0;mesuring=true;setState('rec','Mesure en cours');let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
+function startMeasure(){acc=null;n=0;mesuring=true;setState('rec','Mesure en cours');let t=Math.round(V('dur',8));const bb=$('bmes'),lbl=bb.querySelector('.lbl'),prog=$('bmesProg');bb.disabled=true;bb.classList.add('on');prog.style.transition='none';prog.style.width='0%';
 requestAnimationFrame(()=>{prog.style.transition='width '+t+'s linear';prog.style.width='100%'});
 lbl.textContent='Mesure… '+t+' s';mesInterval=setInterval(()=>{t--;lbl.textContent='Mesure… '+t+' s';if(t<0){clearInterval(mesInterval);mesInterval=null;mesuring=false;setState('live','En direct');lbl.textContent='Analyser';bb.disabled=false;bb.classList.remove('on');prog.style.transition='none';prog.style.width='0%';
 if(noise){noise.stop();noise=null;$('bnoise').classList.remove('on');$('bnoise').querySelector('.lbl').textContent='Lancer le bruit rose'}
@@ -641,7 +668,8 @@ const multiOn=document.body.classList.contains('expert')&&$('multiToggle').check
 if(multiOn&&multiPoints.length<5){
 $('multiStatus').style.display='block';$('multiStatus').textContent=multiPoints.length+' point'+(multiPoints.length>1?'s':'')+' enregistré'+(multiPoints.length>1?'s':'')+'.';
 multiPointModal(multiPoints.length).then(c=>{if(c==='finish')finalizeMulti()})
-}else finalizeMulti()}},1000)};
+}else finalizeMulti()}},1000)}
+$('bmes').onclick=async()=>{if(!noise&&lastDb<-55){const go=await ctsDialog({title:'Aucun son détecté',text:'Le micro n\'entend presque rien. As-tu lancé le bruit rose, dans l\'appli ou depuis ton fichier ? Sans bruit, la mesure sera inutilisable.',ok:'Analyser quand même',cancel:'Annuler'});if(!go)return}startMeasure()};
 function multiPointModal(k){return new Promise(res=>{
 const m=document.createElement('div');m.className='modal';
 m.innerHTML=`<div class="box"><h2 style="margin-top:0">Point ${k} enregistré</h2>
@@ -760,8 +788,12 @@ saveBias(bias);
 if(!AI_WORKER_URL.includes('VOTRE-WORKER')){fetch(AI_WORKER_URL.replace(/\/$/,'')+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lastMeasureId,lieu:k,satisfied:ok,comment:comment||'',ts:Date.now()})}).catch(()=>{})}
 $('fb').innerHTML='<p class="thx">Merci, c\'est pris en compte pour les prochaines mesures.</p>'}
 $('again').onclick=()=>{multiPoints=[];$('multiStatus').style.display='none';show('s2')};
-const setM=e=>{document.body.classList.toggle('expert',e);$('mE').classList.toggle('on',e);$('mB').classList.toggle('on',!e);$('mE').setAttribute('aria-pressed',e);$('mB').setAttribute('aria-pressed',!e)};
+function syncSeg(){const live=!$('s4').classList.contains('off'),ex=document.body.classList.contains('expert');
+[['mL',live],['mE',!live&&ex],['mB',!live&&!ex]].forEach(([id,on])=>{$(id).classList.toggle('on',on);$(id).setAttribute('aria-pressed',String(on))})}
+const setM=e=>{document.body.classList.toggle('expert',e);syncSeg();
+if(!$('sWelcome').classList.contains('off')||!$('s4').classList.contains('off')){leaveCurrent();refreshMicList();show('s1')}};
 $('mB').onclick=()=>setM(false);$('mE').onclick=()=>setM(true);
+$('wOk').onclick=()=>{try{localStorage.setItem('cts_seenintro','1')}catch(e){}refreshMicList();show('s1')};
 $('cp').onclick=async()=>{try{await navigator.clipboard.writeText([...$('peq').querySelectorAll('tr')].map(r=>[...r.cells].map(c=>c.textContent).join('\t')).join('\n'));$('cp').textContent='Copié'}catch(e){$('cp').textContent='Copie impossible'}};
 const LIVE_TAU=45;
 async function wakeLockReq(){try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){wakeLock=null}}
@@ -776,14 +808,19 @@ drift.forEach((x,i)=>{const bad=Math.abs(x)>5;
 if(bad){if(!alertSince[i])alertSince[i]=now;const dur=(now-alertSince[i])/1000,cooled=!alertLast[i]||(now-alertLast[i])>300000;
 if(dur>25&&cooled){alertLast[i]=now;logLive(x>0?`Ça monte vers ${B[i]} Hz depuis un moment.`:`Ça manque vers ${B[i]} Hz depuis un moment.`)}}
 else{alertSince[i]=null}})}
-function liveTick(){if(!an||!liveBase)return;const l=levels();
-liveEma=liveEma?liveEma.map((v,i)=>v+(l[i]-v)/LIVE_TAU):l.slice();
-const drift=liveEma.map((v,i)=>v-liveBase[i]);
-draw(drift,'cvLive');updateBadge(drift);checkAlerts(drift)}
-$('goLive').onclick=async()=>{if(!dev)return;await liveInfoModal();liveBase=dev.slice();liveEma=null;alertSince={};alertLast={};liveOn=true;
-$('liveLog').innerHTML='';show('s4');wakeLockReq();clearInterval(liveTimer);liveTimer=setInterval(liveTick,1000);liveTick()};
+let liveTicks=0;
+function liveTick(){if(!an)return;const r=rel(levels());
+liveEma=liveEma?liveEma.map((v,i)=>v+(r[i]-v)/LIVE_TAU):r.slice();liveTicks++;
+if(!liveBase){if(liveTicks>=5){liveBase=liveEma.slice();logLive('Référence prise : le suivi démarre.')}
+else{draw(Array(B.length).fill(0),'cvLive');const el=$('liveBadge');el.textContent='Calibration…';el.className='badge ok';return}}
+const drift=liveEma.map((v,i)=>v-liveBase[i]);draw(drift,'cvLive');updateBadge(drift);checkAlerts(drift)}
+async function startLive(){if(liveOn)return;await liveInfoModal();
+if(!an){await refreshMicList();if(!(await startMic())){await ctsDialog({title:'Micro inaccessible',text:'Autorise l\'accès au micro dans le navigateur pour utiliser le mode Live.',ok:'OK',cancel:false});return}}
+liveBase=null;liveEma=null;liveTicks=0;alertSince={};alertLast={};liveOn=true;
+$('liveLog').innerHTML='';show('s4');wakeLockReq();clearInterval(liveTimer);liveTimer=setInterval(liveTick,1000);liveTick()}
+$('mL').onclick=()=>{if(liveOn)return;closeMenu();leaveCurrent();startLive()};
 $('liveReset').onclick=()=>{if(liveEma)liveBase=liveEma.slice();alertSince={};alertLast={};logLive('Nouvelle référence prise en compte.')};
-$('liveStop').onclick=()=>{liveOn=false;clearInterval(liveTimer);wakeLockStop();show('s3')};
+$('liveStop').onclick=()=>{liveOn=false;clearInterval(liveTimer);wakeLockStop();refreshMicList();show('s1')};
 
 // --- Pop-up d'explication du mode Live ---
 function liveInfoModal(){return new Promise(res=>{
@@ -799,7 +836,6 @@ document.body.appendChild(m);
 $('liveInfoOk').onclick=()=>{if($('liveInfoSkip').checked)localStorage.setItem('cts_liveinfo','1');m.remove();res()}})}
 
 // --- Accueil (première ouverture) ---
-$('wOk').onclick=()=>{localStorage.setItem('cts_seenintro','1');refreshMicList();show('s1')};
 
 // --- Démarrage ---
 (function boot(){
